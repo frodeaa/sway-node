@@ -6,7 +6,8 @@
   "types": "index.d.ts",
   "scripts": {
     "gulp": "gulp",
-    "test": "gulp test"
+    "lint": "eslint -f stylish .",
+    "test": "mocha"
   },
   "keywords": [
     "api",
