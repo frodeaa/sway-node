@@ -29,7 +29,6 @@
     "url": "git://github.com/apigee-127/sway.git"
   },
   "files": [
-    "dist",
     "index.d.ts",
     "index.js",
     "lib"
