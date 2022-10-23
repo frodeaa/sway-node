@@ -7,7 +7,7 @@
   "scripts": {
     "gulp": "gulp",
     "lint": "eslint -f stylish .",
-    "test": "gulp test"
+    "test": "mocha"
   },
   "keywords": [
     "api",
