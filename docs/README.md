@@ -1,37 +1,16 @@
+> **Note** This is a fork of [apigee-127/sway](https://github.com/apigee-127/sway) with goal to only support Node 16
+> with fewer dependencies
+
 A library that simplifies [Swagger][swagger] integrations.  This library handles the minutiae of loading Swagger
 documents *(local and remote)*, resolving references *(local and remote)*, building an object model and providing you
 with a rich set of APIs for things like Swagger document validation, request/response validation, etc.  For more details
-on the available APIs, please view the [API Documentation](https://github.com/apigee-127/sway/blob/master/docs/API.md).
+on the available APIs, please view the [API Documentation](https://github.com/frodeaa/sway-node/blob/master/docs/API.md).
 
 Sway will always be built around the latest stable release of Swagger, which happens to be version `2.0` right now.
 This means that its APIs and object model will be specific to that version of Swagger and supporting any other versions
 of Swagger will require a conversion step prior to using Sway.
 
 ## Installation
-
-sway is available for both Node.js and the browser.  Installation instructions for each environment are below.
-
-### Browser
-
-sway binaries for the browser are available in the `dist/` directory:
-
-* [sway-standalone.js](https://raw.github.com/apigee-127/sway/master/dist/sway.js): _9,160kb_, full source  and source maps
-* [sway-standalone-min.js](https://raw.github.com/apigee-127/sway/master/dist/sway-min.js): _864kb_, minified, compressed and no source map
-
-**Note:** I realize these binaries are big and I'm working on making them smaller.  Unfortunately, some of this is out
-of my control without rewriting some of the core features provided by third-party libraries currently contributing to
-the size issue.
-
-Of course, these links are for the master builds so feel free to download from the release of your choice.  Once you've
-gotten them downloaded, to use the standalone binaries, your HTML include might look like this:
-
-``` html
-<!-- ... -->
-<script src="sway.js"></script>
-<!-- ... -->
-```
-
-### Node.js
 
 Installation for Node.js applications can be done via [NPM][npm].
 
@@ -41,7 +20,7 @@ npm install sway --save
 
 ## API Documentation
 
-The sway project's API documentation can be found here: https://github.com/apigee-127/sway/blob/master/docs/API.md
+The sway project's API documentation can be found here: https://github.com/frodeaa/sway-node/blob/master/docs/API.md
 
 ## Swagger Resources
 
