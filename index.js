@@ -30,12 +30,6 @@ var JsonRefs = require('json-refs');
 var SwaggerApi = require('./lib/types/api');
 var YAML = require('js-yaml');
 
-// Load promises polyfill if necessary
-/* istanbul ignore if */
-if (typeof Promise === 'undefined') {
-  require('native-promise-only');
-}
-
 /**
  * A library for simpler [Swagger](http://swagger.io/) integrations.
  *
