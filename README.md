@@ -12,7 +12,6 @@ of Swagger will require a conversion step prior to using Sway.
 
 ## Project Badges
 
-![example workflow](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
 * Build status: ![Build Status](https://github.com/frodeaa/sway-node/actions/workflows/node.js.yml/badge.svg)
 * Downloads: [![NPM Downloads Per Month](http://img.shields.io/npm/dm/sway-node.svg)](https://www.npmjs.org/package/sway-node)
 * License: [![License](http://img.shields.io/npm/l/sway-node.svg)](https://github.com/frodeaa/sway-node/blob/master/LICENSE)
