@@ -48,5 +48,10 @@
     "swagger-methods": "^1.0.0",
     "swagger-schema-official": "2.0.0-bab6bed",
     "z-schema": "^5.0.4"
+  },
+  "overrides": {
+    "path-loader": {
+      "superagent": "8.0.3"
+    }
   }
 }
