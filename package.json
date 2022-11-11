@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "debug": "^4.3.4",
-    "js-yaml": "^3.13.1",
+    "js-yaml": "^4.1.0",
     "json-refs": "^3.0.13",
     "json-schema-faker": "^0.5.0-rcv.46",
     "lodash": "^4.17.10",
