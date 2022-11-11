@@ -35,11 +35,11 @@ var YAML = require('js-yaml');
 
 var documentBase = path.join(__dirname, 'browser', 'documents');
 var relativeBase = typeof window === 'undefined' ? documentBase : 'base/browser/documents';
-var swaggerDoc = YAML.safeLoad(fs.readFileSync(path.join(__dirname, './browser/documents/2.0/swagger.yaml'), 'utf8'));
-var swaggerDocCircular = YAML.safeLoad(fs.readFileSync(path.join(__dirname,
+var swaggerDoc = YAML.load(fs.readFileSync(path.join(__dirname, './browser/documents/2.0/swagger.yaml'), 'utf8'));
+var swaggerDocCircular = YAML.load(fs.readFileSync(path.join(__dirname,
                                                                  './browser/documents/2.0/swagger-circular.yaml'),
                                                        'utf8'));
-var swaggerDocRelativeRefs = YAML.safeLoad(fs.readFileSync(path.join(__dirname,
+var swaggerDocRelativeRefs = YAML.load(fs.readFileSync(path.join(__dirname,
                                                                      './browser/documents/2.0/swagger-relative-refs.yaml'),
                                                            'utf8'));
 var swaggerDocValidator = helpers.getJSONSchemaValidator();
