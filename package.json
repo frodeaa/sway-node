@@ -26,7 +26,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git://github.com/frodeaa/sway-node.git"
+    "url": "git+https://github.com/frodeaa/sway-node.git"
   },
   "files": [
     "index.d.ts",
