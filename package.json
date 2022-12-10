@@ -1,6 +1,6 @@
 {
-  "name": "sway-node",
-  "version": "2.0.6.node",
+  "name": "@frodeaa/sway-node",
+  "version": "0.0.0-development",
   "description": "A library that simplifies Swagger integrations.",
   "main": "index.js",
   "types": "index.d.ts",
@@ -63,7 +63,8 @@
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
-      "@semantic-release/github"
+      "@semantic-release/github",
+      "@semantic-release/npm"
     ]
   }
 }
