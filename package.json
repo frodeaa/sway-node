@@ -5,8 +5,8 @@
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "gulp": "gulp",
     "lint": "eslint -f stylish .",
+    "semantic-release": "semantic-release",
     "test": "mocha"
   },
   "keywords": [
@@ -34,8 +34,10 @@
     "lib"
   ],
   "devDependencies": {
+    "@semantic-release/git": "^10.0.1",
     "eslint": "^8.29.0",
-    "mocha": "^10.1.0"
+    "mocha": "^10.1.0",
+    "semantic-release": "^19.0.5"
   },
   "dependencies": {
     "debug": "^4.3.4",
@@ -52,5 +54,15 @@
     "path-loader": {
       "superagent": "8.0.3"
     }
+  },
+  "release": {
+    "branches": [
+      "master"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/github"
+    ]
   }
 }
