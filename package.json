@@ -36,7 +36,7 @@
   "devDependencies": {
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^8.0.7",
-    "eslint": "^8.33.0",
+    "eslint": "^8.34.0",
     "mocha": "^10.2.0",
     "semantic-release": "^20.1.0"
   },
