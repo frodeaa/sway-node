@@ -38,7 +38,7 @@
     "@semantic-release/github": "^8.0.7",
     "eslint": "^8.37.0",
     "mocha": "^10.2.0",
-    "semantic-release": "^21.0.0"
+    "semantic-release": "^21.0.1"
   },
   "dependencies": {
     "debug": "^4.3.4",
