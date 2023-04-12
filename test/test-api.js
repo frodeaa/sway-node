@@ -30,7 +30,7 @@ var _ = require('lodash');
 var assert = require('assert');
 var tHelpers = require('./helpers');
 var JsonRefs = require('json-refs');
-var supportedHttpMethods = require('swagger-methods');
+var supportedHttpMethods = require('../lib/swagger-methods');
 var Sway = tHelpers.getSway();
 
 function getOperationCount (pathDef) {
