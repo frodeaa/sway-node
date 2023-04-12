@@ -1,4 +1,4 @@
-> **Note** This is a fork of [apigee-127/sway](https://github.com/apigee-127/sway) with goal to only support Node 16
+> **Note** This is a fork of [apigee-127/sway](https://github.com/apigee-127/sway) with goal to only support Node 18
 > with fewer dependencies
 
 A library that simplifies [Swagger][swagger] integrations.  This library handles the minutiae of loading Swagger
@@ -22,7 +22,7 @@ of Swagger will require a conversion step prior to using Sway.
 Installation for Node.js applications can be done via [NPM][npm].
 
 ```
-npm install sway --save
+npm install sway-node --save
 ```
 
 ## Documentation
