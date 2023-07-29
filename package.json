@@ -6,6 +6,7 @@
   "types": "index.d.ts",
   "private": false,
   "scripts": {
+    "build": "echo",
     "lint": "eslint -f stylish .",
     "semantic-release": "semantic-release",
     "test": "mocha"

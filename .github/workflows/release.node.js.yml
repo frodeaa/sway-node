@@ -13,8 +13,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: npm ci
-      - run: npm test
+      - run: yarn ci
+      - run: yarn test
 
   semantic-release:
     needs: build
@@ -29,9 +29,11 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: npm ci
-      - run: npm test
+      - run: yarn
+      - run: yarn build
+      - run: yarn lint
+      - run: yarn test
       - env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release
+        run: yarn semantic-release
