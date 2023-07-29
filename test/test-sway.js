@@ -39,9 +39,6 @@ var invalidCreateScenarios = [
   [[{definition: {}, jsonRefs: 'wrongType'}], 'options.jsonRefs must be an object'],
   [[{definition: {}, customFormats: 'wrongType'}], 'options.customFormats must be an array'],
   [[{definition: {}, customFormats: ['wrongType']}], 'options.customFormats at index 0 must be a function'],
-  [[{definition: {}, customFormatGenerators: 'wrongType'}], 'options.customFormatGenerators must be an array'],
-  [[{definition: {}, customFormatGenerators: ['wrongType']}],
-    'options.customFormatGenerators at index 0 must be a function'],
   [[{definition: {}, customValidators: 'wrongType'}], 'options.customValidators must be an array'],
   [[{definition: {}, customValidators: ['wrongType']}], 'options.customValidators at index 0 must be a function']
 ];

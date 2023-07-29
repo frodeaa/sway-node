@@ -66,11 +66,9 @@ function runTests (mode) {
   beforeEach(function () {
     swaggerApi.customValidators = [];
     swaggerApi.customFormats = {};
-    swaggerApi.customFormatGenerators = {};
 
     // When we test SwaggerApi#registerFormat, it registers globally in ZSchema and it has to be unregistered
     swaggerApi.unregisterFormat('alwaysFails');
-    swaggerApi.unregisterFormatGenerator('sway');
   });
 
   describe('should handle Swagger document ' + label + ' relative references', function () {
@@ -415,56 +413,6 @@ function runTests (mode) {
             ]);
             assert.deepEqual(req.body, paramValue.raw);
             assert.deepEqual(req.body, paramValue.value);
-          })
-          .then(done, done);
-      });
-    });
-
-    describe('#registerFormatGenerator', function () {
-      it('should throw TypeError for invalid arguments', function () {
-        var scenarios = [
-          [[], 'name is required'],
-          [[true], 'name must be a string'],
-          [['test'], 'formatGenerator is required'],
-          [['test', true], 'formatGenerator must be a function']
-        ];
-
-        _.forEach(scenarios, function (scenario) {
-          try {
-            swaggerApi.registerFormatGenerator.apply(swaggerApi, scenario[0]);
-
-            tHelpers.shouldHadFailed();
-          } catch (err) {
-            assert.equal(scenario[1], err.message);
-          }
-        });
-      });
-
-      it('should add validator to list of format generators', function (done) {
-        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
-
-        cSwagger.paths['/user/{username}'].get.parameters[0].format = 'sway';
-
-        Sway.create({
-          definition: cSwagger
-        })
-          .then(function (api) {
-            var param = api.getOperation('/user/{username}', 'get').getParameter('username');
-
-            try {
-              param.getSample();
-
-              tHelpers.shouldHadFailed();
-            } catch (err) {
-              assert.equal(err.message.substring(0, 34), 'Error: unknown registry key "sway"');
-            }
-
-            // Register the custom format
-            api.registerFormatGenerator('sway', function () {
-              return 'sway';
-            });
-
-            assert.equal(param.getSample(), 'sway');
           })
           .then(done, done);
       });
