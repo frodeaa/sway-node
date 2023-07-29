@@ -70,14 +70,11 @@ module.exports.create = function (options) {
         throw new TypeError('options.jsonRefs must be an object');
       } else if (!_.isUndefined(options.customFormats) && !_.isArray(options.customFormats)) {
         throw new TypeError('options.customFormats must be an array');
-      } else if (!_.isUndefined(options.customFormatGenerators) && !_.isArray(options.customFormatGenerators)) {
-        throw new TypeError('options.customFormatGenerators must be an array');
       } else if (!_.isUndefined(options.customValidators) && !_.isArray(options.customValidators)) {
         throw new TypeError('options.customValidators must be an array');
       }
 
       helpers.validateOptionsAllAreFunctions(options.customFormats, 'customFormats');
-      helpers.validateOptionsAllAreFunctions(options.customFormatGenerators, 'customFormatGenerators');
       helpers.validateOptionsAllAreFunctions(options.customValidators, 'customValidators');
 
       resolve();

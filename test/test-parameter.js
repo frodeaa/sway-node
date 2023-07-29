@@ -153,58 +153,6 @@ function runTests (mode) {
       });
     });
 
-    describe('#getSample', function () {
-      it('should handle parameter with explicit schema definition (body parameter)', function () {
-        var parameter = swaggerApi.getOperation('/pet', 'post').getParameter('body');
-
-        try {
-          helpers.validateAgainstSchema(tHelpers.swaggerDocValidator,
-                                        parameter.schema,
-                                        parameter.getSample());
-        } catch (err) {
-          tHelpers.shouldNotHadFailed(err);
-        }
-      });
-
-      it('should handle parameter with schema-like definition (non-body parameter)', function () {
-        var parameter = swaggerApi.getOperation('/pet/findByTags', 'get').getParameter('tags');
-
-        try {
-          helpers.validateAgainstSchema(tHelpers.swaggerDocValidator,
-                                        parameter.schema,
-                                        parameter.getSample());
-        } catch (err) {
-          tHelpers.shouldNotHadFailed(err);
-        }
-      });
-
-      it('should handle parameter with date format (Issue 99)', function (done) {
-        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
-
-        cSwagger.paths['/pet'].post.parameters.push({
-            in: 'query',
-          name: 'availableDate',
-          description: 'The date the Pet is available',
-          required: true,
-          type: 'string',
-          format: 'date'
-        });
-
-        Sway.create({
-          definition: cSwagger
-        })
-          .then(function (api) {
-            assert.ok(_.isString(api.getOperation('/pet', 'post').getParameter('availableDate').getSample()));
-          })
-          .then(done, done);
-      });
-
-      it('should handle parameter with file type (Issue 159)', function () {
-        assert.ok(_.isString(swaggerApi.getOperation('/pet/{petId}/uploadImage',
-                                                     'post').getParameter('file').getSample()));
-      });
-    });
-
     describe('#getValue', function () {
       it('should throw TypeError for invalid arguments', function () {
         var scenarios = [

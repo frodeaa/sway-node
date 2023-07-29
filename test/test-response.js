@@ -29,7 +29,6 @@
 var _ = require('lodash');
 var assert = require('assert');
 var tHelpers = require('./helpers');
-var sHelpers = require('../lib/helpers');
 var Sway = tHelpers.getSway();
 var YAML = require('js-yaml');
 
@@ -106,45 +105,6 @@ function runTests (mode) {
 
       it('should return the proper response example for string example', function () {
         assert.deepEqual(operation.getResponse().getExample('application/xml'), exampleXML);
-      });
-    });
-
-    describe('#getSample', function () {
-      it('should return sample for default response when no code is provided', function () {
-        assert.ok(_.isUndefined(swaggerApi.getOperation('/user', 'post').getResponse().getSample()));
-      });
-
-      it('should return sample for the requested response code', function () {
-        var operation = swaggerApi.getOperation('/pet/{petId}', 'get');
-
-        try {
-          sHelpers.validateAgainstSchema(tHelpers.swaggerDocValidator,
-                                         operation.getResponse(200).definition.schema,
-                                         operation.getResponse(200).getSample());
-        } catch (err) {
-          tHelpers.shouldNotHadFailed(err);
-        }
-      });
-
-      it('should return undefined for void response', function () {
-        assert.ok(_.isUndefined(swaggerApi.getOperation('/pet', 'post').getResponse(405).getSample()));
-      });
-
-      it('should handle parameter with file type (Issue 159)', function (done) {
-        var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
-        var cPath = '/pet/{petId}/uploadImage';
-
-        cSwaggerDoc.paths[cPath].post.responses['200'].schema = {
-          type: 'file'
-        };
-
-        Sway.create({
-          definition: cSwaggerDoc
-        })
-          .then(function (api) {
-            assert.ok(_.isString(api.getOperation(cPath,'post').getResponse(200).getSample()));
-          })
-          .then(done, done);
       });
     });
 

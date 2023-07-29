@@ -18,7 +18,6 @@ A library for simpler [Swagger](http://swagger.io/) integrations.
         * [.validateResponse(res, [options])](#module_sway.Operation+validateResponse) ⇒ <code>[ValidationResults](#module_sway.ValidationResults)</code>
     * [.Parameter](#module_sway.Parameter)
         * [new Parameter(opOrPathObject, definition, definitionFullyResolved, pathToDefinition)](#new_module_sway.Parameter_new)
-        * [.getSample()](#module_sway.Parameter+getSample) ⇒ <code>\*</code>
         * [.getValue(req)](#module_sway.Parameter+getValue) ⇒ <code>[ParameterValue](#module_sway.ParameterValue)</code>
     * [.ParameterValue](#module_sway.ParameterValue)
         * [new ParameterValue(parameterObject, raw)](#new_module_sway.ParameterValue_new)
@@ -33,7 +32,6 @@ A library for simpler [Swagger](http://swagger.io/) integrations.
     * [.Response](#module_sway.Response)
         * [new Response(operationObject, statusCode, definition, definitionFullyResolved, pathToDefinition)](#new_module_sway.Response_new)
         * [.getExample([mimeType])](#module_sway.Response+getExample) ⇒ <code>string</code>
-        * [.getSample()](#module_sway.Response+getSample) ⇒ <code>\*</code>
         * [.validateResponse(res, [options])](#module_sway.Response+validateResponse) ⇒ <code>[ValidationResults](#module_sway.ValidationResults)</code>
     * [.ResponseValidationFunction](#module_sway.ResponseValidationFunction) ⇒ <code>[ValidationResults](#module_sway.ValidationResults)</code>
     * [.ResponseValidationOptions](#module_sway.ResponseValidationOptions) : <code>object</code>
@@ -46,10 +44,8 @@ A library for simpler [Swagger](http://swagger.io/) integrations.
         * [.getPath(pathOrReq)](#module_sway.SwaggerApi+getPath) ⇒ <code>[Path](#module_sway.Path)</code>
         * [.getPaths()](#module_sway.SwaggerApi+getPaths) ⇒ <code>[Array.&lt;Path&gt;](#module_sway.Path)</code>
         * [.registerFormat(name, validator)](#module_sway.SwaggerApi+registerFormat)
-        * [.registerFormatGenerator(name, formatGenerator)](#module_sway.SwaggerApi+registerFormatGenerator)
         * [.registerValidator(validator)](#module_sway.SwaggerApi+registerValidator)
         * [.unregisterFormat(name)](#module_sway.SwaggerApi+unregisterFormat)
-        * [.unregisterFormatGenerator(name)](#module_sway.SwaggerApi+unregisterFormatGenerator)
         * [.validate()](#module_sway.SwaggerApi+validate) ⇒ <code>[ValidationResults](#module_sway.ValidationResults)</code>
     * [.ValidationEntry](#module_sway.ValidationEntry) : <code>object</code>
     * [.ValidationResults](#module_sway.ValidationResults) : <code>object</code>
@@ -68,7 +64,6 @@ Options used when creating the `SwaggerApi`.
 | definition | <code>object</code> &#124; <code>string</code> | The Swagger definition location or structure |
 | jsonRefs | <code>object</code> | *(See [JsonRefs~JsonRefsOptions](https://github.com/whitlockjc/json-refs/blob/master/docs/API.md#module_JsonRefs..JsonRefsOptions))* |
 | customFormats | <code>object</code> | The key/value pair of custom formats *(The keys are the format name and the values are async functions.  See [ZSchema Custom Formats](https://github.com/zaggino/z-schema#register-a-custom-format))* |
-| customFormatGenerators | <code>object</code> | The key/value pair of custom format generators *(The keys are the format name and the values are functions.  See [json-schema-mocker Custom Format](https://github.com/json-schema-faker/json-schema-faker#custom-formats))* |
 | customValidators | <code>[Array.&lt;DocumentValidationFunction&gt;](#module_sway.DocumentValidationFunction)</code> | The custom validators |
 
 <a name="module_sway.DocumentValidationFunction"></a>
@@ -240,7 +235,6 @@ Validates the response.
 
 * [.Parameter](#module_sway.Parameter)
     * [new Parameter(opOrPathObject, definition, definitionFullyResolved, pathToDefinition)](#new_module_sway.Parameter_new)
-    * [.getSample()](#module_sway.Parameter+getSample) ⇒ <code>\*</code>
     * [.getValue(req)](#module_sway.Parameter+getValue) ⇒ <code>[ParameterValue](#module_sway.ParameterValue)</code>
 
 <a name="new_module_sway.Parameter_new"></a>
@@ -260,15 +254,6 @@ object.
 | definition | <code>object</code> | The parameter definition *(The raw parameter definition __after__ remote references were resolved)* |
 | definitionFullyResolved | <code>object</code> | The parameter definition with all of its resolvable references resolved |
 | pathToDefinition | <code>Array.&lt;string&gt;</code> | The path segments to the parameter definition |
-
-<a name="module_sway.Parameter+getSample"></a>
-
-#### parameter.getSample() ⇒ <code>\*</code>
-Returns a sample value for the parameter based on its schema;
-
-**Kind**: instance method of <code>[Parameter](#module_sway.Parameter)</code>  
-**Returns**: <code>\*</code> - The sample value  
-<a name="module_sway.Parameter+getValue"></a>
 
 #### parameter.getValue(req) ⇒ <code>[ParameterValue](#module_sway.ParameterValue)</code>
 Returns the parameter value from the request.
@@ -455,7 +440,6 @@ Request validation options.
 * [.Response](#module_sway.Response)
     * [new Response(operationObject, statusCode, definition, definitionFullyResolved, pathToDefinition)](#new_module_sway.Response_new)
     * [.getExample([mimeType])](#module_sway.Response+getExample) ⇒ <code>string</code>
-    * [.getSample()](#module_sway.Response+getSample) ⇒ <code>\*</code>
     * [.validateResponse(res, [options])](#module_sway.Response+validateResponse) ⇒ <code>[ValidationResults](#module_sway.ValidationResults)</code>
 
 <a name="new_module_sway.Response_new"></a>
@@ -489,13 +473,6 @@ Returns the response example for the mime-type.
 | --- | --- | --- |
 | [mimeType] | <code>string</code> | The mime type |
 
-<a name="module_sway.Response+getSample"></a>
-
-#### response.getSample() ⇒ <code>\*</code>
-Returns a sample value.
-
-**Kind**: instance method of <code>[Response](#module_sway.Response)</code>  
-**Returns**: <code>\*</code> - The sample value for the response, which can be undefined if the response schema is not provided  
 <a name="module_sway.Response+validateResponse"></a>
 
 #### response.validateResponse(res, [options]) ⇒ <code>[ValidationResults](#module_sway.ValidationResults)</code>
@@ -563,7 +540,6 @@ information to perform response validation.
 | Name | Type | Description |
 | --- | --- | --- |
 | customFormats | <code>object</code> | The key/value pair of custom formats *(The keys are the format name and the values are async functions.  See [ZSchema Custom Formats](https://github.com/zaggino/z-schema#register-a-custom-format))* |
-| customFormatGenerators | <code>object</code> | The key/value pair of custom format generators *(The keys are the format name and the values are functions.  See [json-schema-mocker Custom Format](https://github.com/json-schema-faker/json-schema-faker#custom-formats))* |
 | customValidators | <code>[Array.&lt;DocumentValidationFunction&gt;](#module_sway.DocumentValidationFunction)</code> | The array of custom validators |
 | definition | <code>object</code> | The original Swagger definition |
 | definitionRemotesResolved | <code>object</code> | The Swagger definition with only its remote references resolved *(This means all references to external/remote documents are replaced with its dereferenced value but all local references are left unresolved.)* |
@@ -583,10 +559,8 @@ information to perform response validation.
     * [.getPath(pathOrReq)](#module_sway.SwaggerApi+getPath) ⇒ <code>[Path](#module_sway.Path)</code>
     * [.getPaths()](#module_sway.SwaggerApi+getPaths) ⇒ <code>[Array.&lt;Path&gt;](#module_sway.Path)</code>
     * [.registerFormat(name, validator)](#module_sway.SwaggerApi+registerFormat)
-    * [.registerFormatGenerator(name, formatGenerator)](#module_sway.SwaggerApi+registerFormatGenerator)
     * [.registerValidator(validator)](#module_sway.SwaggerApi+registerValidator)
     * [.unregisterFormat(name)](#module_sway.SwaggerApi+unregisterFormat)
-    * [.unregisterFormatGenerator(name)](#module_sway.SwaggerApi+unregisterFormatGenerator)
     * [.validate()](#module_sway.SwaggerApi+validate) ⇒ <code>[ValidationResults](#module_sway.ValidationResults)</code>
 
 <a name="new_module_sway.SwaggerApi_new"></a>
@@ -692,18 +666,6 @@ Registers a custom format.
 | name | <code>string</code> | The name of the format |
 | validator | <code>function</code> | The format validator *(See [ZSchema Custom Format](https://github.com/zaggino/z-schema#register-a-custom-format))* |
 
-<a name="module_sway.SwaggerApi+registerFormatGenerator"></a>
-
-#### swaggerApi.registerFormatGenerator(name, formatGenerator)
-Registers a custom format generator.
-
-**Kind**: instance method of <code>[SwaggerApi](#module_sway.SwaggerApi)</code>  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | The name of the format |
-| formatGenerator | <code>function</code> | The format generator *(See [json-schema-mocker Custom Format](https://github.com/json-schema-faker/json-schema-faker#custom-formats))* |
-
 <a name="module_sway.SwaggerApi+registerValidator"></a>
 
 #### swaggerApi.registerValidator(validator)
@@ -729,17 +691,6 @@ Unregisters a custom format.
 | Param | Type | Description |
 | --- | --- | --- |
 | name | <code>string</code> | The name of the format |
-
-<a name="module_sway.SwaggerApi+unregisterFormatGenerator"></a>
-
-#### swaggerApi.unregisterFormatGenerator(name)
-Unregisters a custom format generator.
-
-**Kind**: instance method of <code>[SwaggerApi](#module_sway.SwaggerApi)</code>  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | The name of the format generator |
 
 <a name="module_sway.SwaggerApi+validate"></a>
 

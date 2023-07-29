@@ -27,11 +27,6 @@ declare module 'sway' {
          */
         customFormats?: object;
         /**
-         * The key/value pair of custom format generators *(The keys are the
-         * format name and the values are functions.  See [json-schema-mocker Custom Format](https://github.com/json-schema-faker/json-schema-faker#custom-formats))*
-         */
-        customFormatGenerators?: object;
-        /**
          * The custom validators
          */
         customValidators?: any[];
@@ -266,23 +261,10 @@ declare module 'sway' {
         registerFormat(name: string, validator: Function): void;
 
         /**
-         * Registers a custom format generator.
-         * @param name - The name of the format
-         * @param formatGenerator - The format generator *(See [json-schema-mocker Custom Format](https://github.com/json-schema-faker/json-schema-faker#custom-formats))*
-         */
-        registerFormatGenerator(name: string, formatGenerator: Function): void;
-
-        /**
          * Unregisters a custom format.
          * @param name - The name of the format
          */
         unregisterFormat(name: string): void;
-
-        /**
-         * Unregisters a custom format generator.
-         * @param name - The name of the format generator
-         */
-        unregisterFormatGenerator(name: string): void;
 
         /**
          * Registers a custom validator.
@@ -415,12 +397,6 @@ declare module 'sway' {
         constructor(opOrPathObject: Operation | Path, definition: object, definitionFullyResolved: object, pathToDefinition: string[]);
 
         /**
-         * Returns a sample value for the parameter based on its schema;
-         * @returns The sample value
-         */
-        getSample(): any;
-
-        /**
          * Returns the parameter value from the request.
          * 
          * **Note:** Below is the list of `req` properties used *(req should be an `http.ClientRequest` or equivalent)*:
@@ -514,12 +490,6 @@ declare module 'sway' {
          * @returns The response example as a string or `undefined` if the response code and/or mime-type is missing
          */
         getExample(mimeType?: string): string;
-
-        /**
-         * Returns a sample value.
-         * @returns The sample value for the response, which can be undefined if the response schema is not provided
-         */
-        getSample(): any;
 
         /**
          * Validates the response.
