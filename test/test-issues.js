@@ -113,7 +113,7 @@ describe('issues', function () {
   });
 
   it('should handle request objects that are not plain objects (Issue 35)', function () {
-    var mockReq = new Object(); // eslint-disable-line no-new-object
+    var mockReq = new Object();
 
     mockReq.url = '/pet/1';
 

@@ -7,7 +7,7 @@
   "private": false,
   "scripts": {
     "build": "echo",
-    "lint": "eslint -f stylish .",
+    "lint": "eslint -f stylish -c eslint.config.mjs",
     "semantic-release": "semantic-release",
     "test": "mocha"
   },
@@ -36,11 +36,11 @@
     "lib"
   ],
   "devDependencies": {
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^10.0.2",
-    "eslint": "^8.38.0",
-    "mocha": "^10.2.0",
-    "semantic-release": "^23.0.6"
+    "@semantic-release/git": "10.0.1",
+    "@semantic-release/github": "10.0.3",
+    "eslint": "9.1.1",
+    "mocha": "10.4.0",
+    "semantic-release": "23.0.8"
   },
   "dependencies": {
     "debug": "^4.3.4",
