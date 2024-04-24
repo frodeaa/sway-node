@@ -51,10 +51,8 @@
     "swagger-schema-official": "2.0.0-bab6bed",
     "z-schema": "^6.0.1"
   },
-  "overrides": {
-    "path-loader": {
-      "superagent": "8.0.3"
-    }
+  "resolutions": {
+    "superagent": "9.0.1"
   },
   "release": {
     "branches": [
