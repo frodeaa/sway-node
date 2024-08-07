@@ -26,6 +26,7 @@
 
 'use strict';
 
+const {before, describe, it} = require('node:test');
 var _ = require('lodash');
 var assert = require('assert');
 var helpers = require('./helpers');
@@ -36,11 +37,13 @@ var Sway = helpers.getSway();
 describe('issues', function () {
   var swaggerApi;
 
-  before(function (done) {
-    helpers.getSwaggerApi(function (api) {
-      swaggerApi = api;
+  before(async () => {
+    await new Promise((done) => {
+      helpers.getSwaggerApi(function (api) {
+        swaggerApi = api;
 
-      done();
+        done();
+      });
     });
   });
 
@@ -67,21 +70,23 @@ describe('issues', function () {
       .then(done, done);
   });
 
-  it('should support relative references (and to YAML files) (Issue 17)', function (done) {
-    helpers.getSwaggerApiRelativeRefs(function (swaggerApiRelativeRefs) {
-      assert.ok(_.isUndefined(swaggerApiRelativeRefs.definitionFullyResolved.info.$ref));
-      assert.ok(Object.keys(swaggerApiRelativeRefs.definitionFullyResolved.definitions).length > 1);
-      assert.ok(Object.keys(swaggerApiRelativeRefs.definitionFullyResolved.paths).length > 1);
-      assert.equal(swaggerApiRelativeRefs.definitionFullyResolved.info.title, 'Swagger Petstore');
-      assert.ok(_.isPlainObject(swaggerApiRelativeRefs.definitionFullyResolved.definitions.Pet));
-      assert.ok(_.isPlainObject(swaggerApiRelativeRefs.definitionFullyResolved.paths['/pet/{petId}'].get));
+  it('should support relative references (and to YAML files) (Issue 17)', async () => {
+    await new Promise((done) => {
+      helpers.getSwaggerApiRelativeRefs(function (swaggerApiRelativeRefs) {
+        assert.ok(_.isUndefined(swaggerApiRelativeRefs.definitionFullyResolved.info.$ref));
+        assert.ok(Object.keys(swaggerApiRelativeRefs.definitionFullyResolved.definitions).length > 1);
+        assert.ok(Object.keys(swaggerApiRelativeRefs.definitionFullyResolved.paths).length > 1);
+        assert.equal(swaggerApiRelativeRefs.definitionFullyResolved.info.title, 'Swagger Petstore');
+        assert.ok(_.isPlainObject(swaggerApiRelativeRefs.definitionFullyResolved.definitions.Pet));
+        assert.ok(_.isPlainObject(swaggerApiRelativeRefs.definitionFullyResolved.paths['/pet/{petId}'].get));
 
-      _.each(swaggerApiRelativeRefs.references, function (entry) {
-        assert.ok(typeof entry.missing === 'undefined');
-      });
+        _.each(swaggerApiRelativeRefs.references, function (entry) {
+          assert.ok(typeof entry.missing === 'undefined');
+        });
 
-      done();
-    })
+        done();
+      })
+    });
   });
 
   it('should not throw an error for unknown formats (Issue 20)', function (done) {
@@ -255,7 +260,7 @@ describe('issues', function () {
 
         // Browsers do not have a 'Buffer' type so we basically skip this test
         if (typeof window === 'undefined') {
-          value = new Buffer(rawValue);
+          value = Buffer.from(rawValue);
         } else {
           value = rawValue;
         }
@@ -433,11 +438,13 @@ describe('issues', function () {
   describe('should handle circular documents and inputs', function () {
     var swaggerApiCircular;
 
-    before(function (done) {
-      helpers.getSwaggerApiCircular(function (api) {
-        swaggerApiCircular = api;
-
-        done();
+    before(async () => {
+      await new Promise((done) => {
+        helpers.getSwaggerApiCircular(function (api) {
+          swaggerApiCircular = api;
+  
+          done();
+        });
       });
     });
 

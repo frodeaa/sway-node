@@ -26,6 +26,7 @@
 
 'use strict';
 
+const {describe, it} = require('node:test');
 var _ = require('lodash');
 var assert = require('assert');
 var helpers = require('./helpers');

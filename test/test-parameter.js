@@ -26,6 +26,7 @@
 
 'use strict';
 
+const {before, describe, it} = require('node:test');
 var _ = require('lodash');
 var assert = require('assert');
 var helpers = require('../lib/helpers'); // Helpers from Sway
@@ -36,18 +37,20 @@ function runTests (mode) {
   var label = mode === 'with-refs' ? 'with' : 'without';
   var swaggerApi;
 
-  before(function (done) {
-    function callback (api) {
-      swaggerApi = api;
+  before(async () => {
+    await new Promise((done) => {
+      function callback (api) {
+        swaggerApi = api;
 
-      done();
-    }
+        done();
+      }
 
-    if (mode === 'with-refs') {
-      tHelpers.getSwaggerApiRelativeRefs(callback);
-    } else {
-      tHelpers.getSwaggerApi(callback);
-    }
+      if (mode === 'with-refs') {
+        tHelpers.getSwaggerApiRelativeRefs(callback);
+      } else {
+        tHelpers.getSwaggerApi(callback);
+      }
+    });
   });
 
   describe('should handle Swagger document ' + label + ' relative references', function () {
@@ -728,7 +731,7 @@ function runTests (mode) {
             var multipleParamValue;
             var singleStrBooleanLikeValue;
 
-            before(function (done) {
+            before(async () => {
               var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
 
               cSwaggerDoc.paths['/pet/findByStatus'].get.parameters.push({
@@ -742,36 +745,38 @@ function runTests (mode) {
 
               // Test primitive values, because req.query.PARAM will return a primitive
               // if only one is passed to the query param.
-              Sway.create({definition: cSwaggerDoc})
-                .then(function (api) {
-                  var parameter = api.getOperation('/pet/findByStatus', 'get').getParameter('versions');
+              await new Promise((done) => {
+                Sway.create({definition: cSwaggerDoc})
+                  .then(function (api) {
+                    var parameter = api.getOperation('/pet/findByStatus', 'get').getParameter('versions');
 
-                  // Test a string value that JSON.parse would coerse to Number
-                  singleNumParamValue = parameter.getValue({
-                    query: {
-                      versions: '1.1'
-                    }
-                  });
-                  // Test a string value that JSON.parse would coerse to Number
-                  singleStrBooleanLikeValue = parameter.getValue({
-                    query: {
-                      versions: 'true'
-                    }
-                  });
-                  // Test a string value
-                  singleStrParamValue = parameter.getValue({
-                    query: {
-                      versions: '1.1#rc'
-                    }
-                  });
-                  // Test an array value
-                  multipleParamValue = parameter.getValue({
-                    query: {
-                      versions: ['1.0', '1.1#rc']
-                    }
-                  });
-                })
-                .then(done, done);
+                    // Test a string value that JSON.parse would coerse to Number
+                    singleNumParamValue = parameter.getValue({
+                      query: {
+                        versions: '1.1'
+                      }
+                    });
+                    // Test a string value that JSON.parse would coerse to Number
+                    singleStrBooleanLikeValue = parameter.getValue({
+                      query: {
+                        versions: 'true'
+                      }
+                    });
+                    // Test a string value
+                    singleStrParamValue = parameter.getValue({
+                      query: {
+                        versions: '1.1#rc'
+                      }
+                    });
+                    // Test an array value
+                    multipleParamValue = parameter.getValue({
+                      query: {
+                        versions: ['1.0', '1.1#rc']
+                      }
+                    });
+                  })
+                  .then(done, done);
+              });
             });
 
             describe('array', function () {
@@ -1009,7 +1014,7 @@ function runTests (mode) {
             describe('boolean', function () {
               var cParam;
 
-              before(function (done) {
+              before(async () => {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.paths['/pet/available'] = {
@@ -1027,13 +1032,15 @@ function runTests (mode) {
                   }
                 };
 
-                Sway.create({
-                  definition: cSwagger
-                })
-                  .then(function (api) {
-                    cParam = api.getOperation('/pet/available', 'get').getParameter('status');
+                await new Promise((done) => {
+                  Sway.create({
+                    definition: cSwagger
                   })
-                  .then(done, done);
+                    .then(function (api) {
+                      cParam = api.getOperation('/pet/available', 'get').getParameter('status');
+                    })
+                    .then(done, done);
+                });
               });
 
               it('boolean request value', function () {
@@ -1073,7 +1080,7 @@ function runTests (mode) {
             describe('integer', function () {
               var cParam;
 
-              before(function (done) {
+              before(async () => {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.paths['/pet/{petId}/friends'] = {
@@ -1091,13 +1098,15 @@ function runTests (mode) {
                   }
                 };
 
-                Sway.create({
-                  definition: cSwagger
-                })
-                  .then(function (api) {
-                    cParam = api.getOperation('/pet/{petId}/friends', 'get').getParameter('limit');
+                await new Promise((done) => {
+                  Sway.create({
+                    definition: cSwagger
                   })
-                  .then(done, done);
+                    .then(function (api) {
+                      cParam = api.getOperation('/pet/{petId}/friends', 'get').getParameter('limit');
+                    })
+                    .then(done, done);
+                });
               });
 
               it('integer request value', function () {
@@ -1232,7 +1241,7 @@ function runTests (mode) {
             describe('number', function () {
               var cParam;
 
-              before(function (done) {
+              before(async () => {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.paths['/pet/{petId}/friends'] = {
@@ -1250,13 +1259,17 @@ function runTests (mode) {
                   }
                 };
 
-                Sway.create({
-                  definition: cSwagger
-                })
-                  .then(function (api) {
-                    cParam = api.getOperation('/pet/{petId}/friends', 'get').getParameter('limit');
+                await new Promise((done) => {
+                  Sway.create({
+                    definition: cSwagger,
                   })
-                  .then(done, done);
+                    .then(function (api) {
+                      cParam = api
+                        .getOperation('/pet/{petId}/friends', 'get')
+                        .getParameter('limit');
+                    })
+                    .then(done, done);
+                });
               });
 
               it('number request value', function () {
@@ -1344,7 +1357,7 @@ function runTests (mode) {
                 var invalidValues = ['invalid', '12345', 'jan 5', '"2015-04-09"',
                   '2015-00-09', '2015-13-09', '2015-04-00', '2015-04-32', '10000-01-01'];
 
-                before(function (done) {
+                before(async () => {
                   var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                   cSwagger.paths['/pet/{petId}'].parameters.push({
@@ -1355,13 +1368,15 @@ function runTests (mode) {
                     format: 'date'
                   });
 
-                  Sway.create({
-                    definition: cSwagger
-                  })
-                    .then(function (api) {
-                      cParam = api.getOperation('/pet/{petId}', 'get').getParameter('createdBefore');
+                  await new Promise((done) => {
+                    Sway.create({
+                      definition: cSwagger
                     })
-                    .then(done, done);
+                      .then(function (api) {
+                        cParam = api.getOperation('/pet/{petId}', 'get').getParameter('createdBefore');
+                      })
+                      .then(done, done);
+                  });
                 });
 
                 it('date request value', function () {
@@ -1412,7 +1427,7 @@ function runTests (mode) {
                   '2015-04-32T14:07:26-06:00', '2015-04-09T24:07:26-06:00', '2015-04-09T14:60:26-06:00',
                   '2015-04-09T14:07:61-06:00', '2015-04-09T14:07:26-25:00', '2015-04-09T14:07:26+25:00'];
 
-                before(function (done) {
+                before(async () => {
                   var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                   cSwagger.paths['/pet/{petId}'].parameters.push({
@@ -1423,13 +1438,15 @@ function runTests (mode) {
                     format: 'date-time'
                   });
 
-                  Sway.create({
-                    definition: cSwagger
-                  })
-                    .then(function (api) {
-                      cParam = api.getOperation('/pet/{petId}', 'get').getParameter('createdBefore');
+                  await new Promise((done) => {
+                    Sway.create({
+                      definition: cSwagger
                     })
-                    .then(done, done);
+                      .then(function (api) {
+                        cParam = api.getOperation('/pet/{petId}', 'get').getParameter('createdBefore');
+                      })
+                      .then(done, done);
+                  });
                 });
 
                 it('date request value', function () {

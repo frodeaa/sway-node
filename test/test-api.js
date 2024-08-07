@@ -26,6 +26,7 @@
 
 'use strict';
 
+const {before, beforeEach, describe, it} = require('node:test');
 var _ = require('lodash');
 var assert = require('assert');
 var tHelpers = require('./helpers');
@@ -49,18 +50,20 @@ function runTests (mode) {
   var label = mode === 'with-refs' ? 'with' : 'without';
   var swaggerApi;
 
-  before(function (done) {
-    function callback (api) {
-      swaggerApi = api;
+  before(async () => {
+    await new Promise((done) => {
+      function callback (api) {
+        swaggerApi = api;
 
-      done();
-    }
+        done();
+      }
 
-    if (mode === 'with-refs') {
-      tHelpers.getSwaggerApiRelativeRefs(callback);
-    } else {
-      tHelpers.getSwaggerApi(callback);
-    }
+      if (mode === 'with-refs') {
+        tHelpers.getSwaggerApiRelativeRefs(callback);
+      } else {
+        tHelpers.getSwaggerApi(callback);
+      }
+    });
   });
 
   beforeEach(function () {
