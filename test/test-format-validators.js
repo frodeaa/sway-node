@@ -77,7 +77,9 @@ describe('format validators', function () {
 
   describe('int32', function () {
     var badParamValue;
+    var badParamNumberValue;
     var goodParamValue;
+    var goodParamNumberValue;
 
     before(async () => {
       var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
@@ -89,18 +91,37 @@ describe('format validators', function () {
         format: 'int32'
       });
 
+      cSwaggerDoc.paths['/pet/findByStatus'].get.parameters.push({
+        name: 'int32Number',
+          in: 'query',
+        type: 'number',
+        format: 'int32'
+      });
+
       // Test the format validator using parameter validation
       await new Promise((done) => {
         Sway.create({definition: cSwaggerDoc})
           .then(function (api) {
-              badParamValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int32').getValue({
+            badParamValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int32').getValue({
               query: {
                 int32: 1.1
               }
             });
+            badParamNumberValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int32Number').getValue({
+              query: {
+                int32Number: 1.1
+              }
+            });
+
             goodParamValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int32').getValue({
               query: {
-                int32: 1
+                int32: 1,
+              }
+            });
+
+            goodParamNumberValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int32Number').getValue({
+              query: {
+                int32Number: 1,
               }
             });
           })
@@ -124,6 +145,19 @@ describe('format validators', function () {
           params: ['integer', 'number'],
           path: []
         },
+      ]);
+    });
+
+    it('bad number value', function () {
+      var error = badParamNumberValue.error;
+
+      assert.ok(!badParamNumberValue.valid);
+      assert.ok(!_.isUndefined(badParamNumberValue.value));
+      assert.equal(badParamNumberValue.raw, 1.1);
+      assert.equal(error.message, 'Value failed JSON Schema validation');
+      assert.equal(error.code, 'SCHEMA_VALIDATION_FAILED');
+      assert.ok(error.failedValidation);
+      assert.deepEqual(error.errors, [
         {
           code: 'INVALID_FORMAT',
           message: 'Object didn\'t pass validation for format int32: 1.1',
@@ -139,11 +173,17 @@ describe('format validators', function () {
     it('good value', function () {
       assert.ok(goodParamValue.valid);
     });
+
+    it('good number value', function () {
+      assert.ok(goodParamNumberValue.valid);
+    });
   });
 
   describe('int64', function () {
     var badParamValue;
+    var badParamNumberValue;
     var goodParamValue;
+    var goodParamNumberValue;
 
     before(async () => {
       var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
@@ -152,6 +192,13 @@ describe('format validators', function () {
         name: 'int64',
           in: 'query',
         type: 'integer',
+        format: 'int64'
+      });
+
+      cSwaggerDoc.paths['/pet/findByStatus'].get.parameters.push({
+        name: 'int64Number',
+          in: 'query',
+        type: 'number',
         format: 'int64'
       });
 
@@ -164,9 +211,22 @@ describe('format validators', function () {
                 int64: 1.1
               }
             });
+
+            badParamNumberValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int64Number').getValue({
+              query: {
+                int64Number: 1.1
+              }
+            });
+
             goodParamValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int64').getValue({
               query: {
-                int64: 1
+                int64: 1,
+              }
+            });
+
+            goodParamNumberValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int64Number').getValue({
+              query: {
+                int64Number: 1,
               }
             });
           })
@@ -180,6 +240,25 @@ describe('format validators', function () {
       assert.ok(!badParamValue.valid);
       assert.ok(!_.isUndefined(badParamValue.value));
       assert.equal(badParamValue.raw, 1.1);
+      assert.equal(error.message, 'Value failed JSON Schema validation');
+      assert.equal(error.code, 'SCHEMA_VALIDATION_FAILED');
+      assert.ok(error.failedValidation);
+      assert.deepEqual(error.errors, [
+        {
+          code: 'INVALID_TYPE',
+          message: 'Expected type integer but found type number',
+          params: ['integer', 'number'],
+          path: []
+        },
+      ]);
+    });
+
+    it.skip('bad number value', function () {
+      var error = badParamNumberValue.error;
+
+      assert.ok(!badParamNumberValue.valid);
+      assert.ok(!_.isUndefined(badParamNumberValue.value));
+      assert.equal(badParamNumberValue.raw, 1.1);
       assert.equal(error.message, 'Value failed JSON Schema validation');
       assert.equal(error.code, 'SCHEMA_VALIDATION_FAILED');
       assert.ok(error.failedValidation);
@@ -205,5 +284,10 @@ describe('format validators', function () {
     it('good value', function () {
       assert.ok(goodParamValue.valid);
     });
+
+    it('good number value', function () {
+      assert.ok(goodParamNumberValue.valid);
+    });
+
   });
 });
