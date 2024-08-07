@@ -26,6 +26,7 @@
 
 'use strict';
 
+const {before, describe, it} = require('node:test');
 var _ = require('lodash');
 var assert = require('assert');
 var tHelpers = require('./helpers');
@@ -36,18 +37,18 @@ function runTests (mode) {
   var label = mode === 'with-refs' ? 'with' : 'without';
   var swaggerApi;
 
-  before(function (done) {
-    function callback (api) {
-      swaggerApi = api;
-
-      done();
-    }
-
-    if (mode === 'with-refs') {
-      tHelpers.getSwaggerApiRelativeRefs(callback);
-    } else {
-      tHelpers.getSwaggerApi(callback);
-    }
+  before(async () => {
+      await new Promise((done) => {
+          function callback (api) {
+              swaggerApi = api;
+              done();
+          }
+          if (mode === 'with-refs') {
+              tHelpers.getSwaggerApiRelativeRefs(callback);
+          } else {
+              tHelpers.getSwaggerApi(callback);
+          }
+      });
   });
 
   describe('should handle Swagger document ' + label + ' relative references', function () {
@@ -64,7 +65,7 @@ function runTests (mode) {
       ].join('\n');
       var operation;
 
-      before(function (done) {
+      before(async () => {
         var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
         var examples = {
           'application/json': example,
@@ -81,6 +82,7 @@ function runTests (mode) {
         };
         cSwaggerDoc.paths['/pet/{petId}'].get.responses['200'].examples = examples;
 
+        await new Promise((done) => {
         Sway.create({
           definition: cSwaggerDoc
         })
@@ -88,6 +90,7 @@ function runTests (mode) {
             operation = api.getOperation('/pet/{petId}', 'get');
           })
           .then(done, done);
+        });
       });
 
       it('should return default response example when no code is provided', function () {
@@ -118,7 +121,7 @@ function runTests (mode) {
         describe('operation level produces', function () {
           var cSway;
 
-          before(function (done) {
+          before(async () => {
             var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
 
             // Schemas are added so they don't get recognized as void responses
@@ -135,6 +138,7 @@ function runTests (mode) {
               }
             };
 
+            await new Promise((done) => {
             Sway.create({
               definition: cSwaggerDoc
             })
@@ -142,6 +146,7 @@ function runTests (mode) {
                 cSway = api;
               })
               .then(done, done);
+            });
           });
 
           describe('unsupported value', function () {
@@ -520,7 +525,7 @@ function runTests (mode) {
 
             // Browsers do not have a 'Buffer' type so we basically skip this test
             if (typeof window === 'undefined') {
-              value = new Buffer('OK');
+              value = Buffer.from('OK');
             } else {
               value = 'OK';
             }
@@ -614,7 +619,7 @@ function runTests (mode) {
 
                 // Browsers do not have a 'Buffer' type so we basically skip this test
                 if (typeof window === 'undefined') {
-                  value = new Buffer('OK');
+                  value = Buffer.from('OK');
                 } else {
                   value = 'OK';
                 }

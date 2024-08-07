@@ -26,6 +26,7 @@
 
 'use strict';
 
+const {before, describe, it} = require('node:test');
 var _ = require('lodash');
 var assert = require('assert');
 var helpers = require('./helpers');
@@ -78,7 +79,7 @@ describe('format validators', function () {
     var badParamValue;
     var goodParamValue;
 
-    before(function (done) {
+    before(async () => {
       var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
 
       cSwaggerDoc.paths['/pet/findByStatus'].get.parameters.push({
@@ -89,20 +90,22 @@ describe('format validators', function () {
       });
 
       // Test the format validator using parameter validation
-      Sway.create({definition: cSwaggerDoc})
-        .then(function (api) {
-            badParamValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int32').getValue({
-            query: {
-              int32: 1.1
-            }
-          });
-          goodParamValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int32').getValue({
-            query: {
-              int32: 1
-            }
-          });
-        })
-        .then(done, done);
+      await new Promise((done) => {
+        Sway.create({definition: cSwaggerDoc})
+          .then(function (api) {
+              badParamValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int32').getValue({
+              query: {
+                int32: 1.1
+              }
+            });
+            goodParamValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int32').getValue({
+              query: {
+                int32: 1
+              }
+            });
+          })
+          .then(done, done);
+      });
     });
 
     it('bad value', function () {
@@ -142,7 +145,7 @@ describe('format validators', function () {
     var badParamValue;
     var goodParamValue;
 
-    before(function (done) {
+    before(async () => {
       var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
 
       cSwaggerDoc.paths['/pet/findByStatus'].get.parameters.push({
@@ -152,21 +155,23 @@ describe('format validators', function () {
         format: 'int64'
       });
 
-      // Test the format validator using parameter validation
-      Sway.create({definition: cSwaggerDoc})
-        .then(function (api) {
-          badParamValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int64').getValue({
-            query: {
-              int64: 1.1
-            }
-          });
-          goodParamValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int64').getValue({
-            query: {
-              int64: 1
-            }
-          });
-        })
-        .then(done, done);
+      await new Promise((done) => {
+        // Test the format validator using parameter validation
+        Sway.create({definition: cSwaggerDoc})
+          .then(function (api) {
+            badParamValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int64').getValue({
+              query: {
+                int64: 1.1
+              }
+            });
+            goodParamValue = api.getOperation('/pet/findByStatus', 'get').getParameter('int64').getValue({
+              query: {
+                int64: 1
+              }
+            });
+          })
+          .then(done, done);
+      });
     });
 
     it('bad value', function () {
