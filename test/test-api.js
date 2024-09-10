@@ -161,9 +161,9 @@ function runTests (mode) {
         var operations = swaggerApi.getOperationsByTag('store');
 
         assert.equal(operations.length,
-                    getOperationCount(swaggerApi.definitionFullyResolved.paths['/store/inventory']) +
-                    getOperationCount(swaggerApi.definitionFullyResolved.paths['/store/order']) +
-                    getOperationCount(swaggerApi.definitionFullyResolved.paths['/store/order/{orderId}']));
+          getOperationCount(swaggerApi.definitionFullyResolved.paths['/store/inventory']) +
+          getOperationCount(swaggerApi.definitionFullyResolved.paths['/store/order']) +
+          getOperationCount(swaggerApi.definitionFullyResolved.paths['/store/order/{orderId}']));
       });
     });
 
@@ -172,7 +172,7 @@ function runTests (mode) {
         describe('multiple matches', function () {
           // This test is likely superfluous but while working on Issue 76 this was broken (pre-commit) and so this test
           // is here just to be sure.
-          it('match identical', function (done) {
+          it('match identical', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
             var matches = [
               '/foo/{0}/baz',
@@ -183,29 +183,33 @@ function runTests (mode) {
               cSwagger.paths[newPath] = {};
             });
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                assert.equal(api.getPath('/foo/{1}/baz').path, matches[1]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  assert.equal(api.getPath('/foo/{1}/baz').path, matches[1]);
+                })
+                .then(resolve, reject);
+            });
           });
         });
 
-        it('should handle regex characters in path', function (done) {
+        it('should handle regex characters in path', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
           var path = '/foo/({bar})';
 
           cSwagger.paths[path] = {};
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              tHelpers.checkType(api.getPath(path), 'Path');
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                tHelpers.checkType(api.getPath(path), 'Path');
+              })
+              .then(resolve, reject);
+          });
         });
 
         it('should return the expected path object', function () {
@@ -219,7 +223,7 @@ function runTests (mode) {
 
       describe('http.ClientRequest (or similar)', function () {
         describe('multiple matches', function () {
-          it('complete static match', function (done) {
+          it('complete static match', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
             var lesserMatches = [
               '/foo/bar/{baz}',
@@ -232,19 +236,21 @@ function runTests (mode) {
               cSwagger.paths[newPath] = {};
             });
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                assert.equal(api.getPath({
-                  url: swaggerApi.basePath + match
-                }).path, match);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  assert.equal(api.getPath({
+                    url: swaggerApi.basePath + match
+                  }).path, match);
+                })
+                .then(resolve, reject);
+            });
           });
 
           // While this scenario should never happen in a valid Swagger document, we handle it anyways
-          it('match multiple levels deep', function (done) {
+          it('match multiple levels deep', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
             var lesserMatches = [
               '/foo/{bar}/baz/{qux}'
@@ -255,18 +261,20 @@ function runTests (mode) {
               cSwagger.paths[newPath] = {};
             });
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                assert.equal(api.getPath({
-                  url: swaggerApi.basePath + match
-                }).path, match);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  assert.equal(api.getPath({
+                    url: swaggerApi.basePath + match
+                  }).path, match);
+                })
+                .then(resolve, reject);
+            });
           });
 
-          it('match single level deep', function (done) {
+          it('match single level deep', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
             var lesserMatches = [
               '/foo/{bar}/baz',
@@ -278,19 +286,21 @@ function runTests (mode) {
               cSwagger.paths[newPath] = {};
             });
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                assert.equal(api.getPath({
-                  url: swaggerApi.basePath + match
-                }).path, match);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  assert.equal(api.getPath({
+                    url: swaggerApi.basePath + match
+                  }).path, match);
+                })
+                .then(resolve, reject);
+            });
           });
 
           // While this scenario should never happen in a valid Swagger document, we handle it anyways
-          it('match identical', function (done) {
+          it('match identical', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
             var matches = [
               '/foo/{0}/baz',
@@ -301,33 +311,37 @@ function runTests (mode) {
               cSwagger.paths[newPath] = {};
             });
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                tHelpers.checkType(api.getPath({
-                  url: swaggerApi.basePath + '/foo/bar/baz'
-                }), 'Path');
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  tHelpers.checkType(api.getPath({
+                    url: swaggerApi.basePath + '/foo/bar/baz'
+                  }), 'Path');
+                })
+                .then(resolve, reject);
+            });
           });
         });
 
-        it('should handle regex characters in path', function (done) {
+        it('should handle regex characters in path', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
           var path = '/foo/({bar})';
 
           cSwagger.paths[path] = {};
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              tHelpers.checkType(api.getPath({
-                url: swaggerApi.basePath + '/foo/(bar)'
-              }), 'Path');
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                tHelpers.checkType(api.getPath({
+                  url: swaggerApi.basePath + '/foo/(bar)'
+                }), 'Path');
+              })
+              .then(resolve, reject);
+          });
         });
 
         it('should return the expected path object', function () {
@@ -370,7 +384,7 @@ function runTests (mode) {
         });
       });
 
-      it('should add validator to list of validators', function (done) {
+      it('should add validator to list of validators', async function () {
         var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
         cSwagger.definitions.Pet.properties.customFormat = {
@@ -378,46 +392,48 @@ function runTests (mode) {
           type: 'string'
         };
 
-        Sway.create({
-          definition: cSwagger
-        })
-          .then(function (api) {
-            var req = {
-              body: {
-                customFormat: 'shouldFail',
-                name: 'Test Pet',
-                photoUrls: []
-              }
-            };
-            var paramValue = api.getOperation('/pet', 'post').getParameter('body').getValue(req);
-
-            assert.ok(_.isUndefined(paramValue.error));
-            assert.deepEqual(req.body, paramValue.raw);
-            assert.deepEqual(req.body, paramValue.value);
-
-            // Register the custom format
-            api.registerFormat('alwaysFails', function () {
-              return false;
-            });
-
-            paramValue = api.getOperation('/pet', 'post').getParameter('body').getValue(req);
-
-            assert.equal(paramValue.error.message, 'Value failed JSON Schema validation');
-            assert.equal(paramValue.error.code, 'SCHEMA_VALIDATION_FAILED');
-            assert.deepEqual(paramValue.error.path, ['paths', '/pet', 'post', 'parameters', '0']);
-            assert.ok(paramValue.error.failedValidation)
-            assert.deepEqual(paramValue.error.errors, [
-              {
-                code: 'INVALID_FORMAT',
-                params: ['alwaysFails', 'shouldFail'],
-                message: "Object didn't pass validation for format alwaysFails: shouldFail",
-                path: ['customFormat']
-              }
-            ]);
-            assert.deepEqual(req.body, paramValue.raw);
-            assert.deepEqual(req.body, paramValue.value);
+        await new Promise((resolve, reject) => {
+          Sway.create({
+            definition: cSwagger
           })
-          .then(done, done);
+            .then(function (api) {
+              var req = {
+                body: {
+                  customFormat: 'shouldFail',
+                  name: 'Test Pet',
+                  photoUrls: []
+                }
+              };
+              var paramValue = api.getOperation('/pet', 'post').getParameter('body').getValue(req);
+
+              assert.ok(_.isUndefined(paramValue.error));
+              assert.deepEqual(req.body, paramValue.raw);
+              assert.deepEqual(req.body, paramValue.value);
+
+              // Register the custom format
+              api.registerFormat('alwaysFails', function () {
+                return false;
+              });
+
+              paramValue = api.getOperation('/pet', 'post').getParameter('body').getValue(req);
+
+              assert.equal(paramValue.error.message, 'Value failed JSON Schema validation');
+              assert.equal(paramValue.error.code, 'SCHEMA_VALIDATION_FAILED');
+              assert.deepEqual(paramValue.error.path, ['paths', '/pet', 'post', 'parameters', '0']);
+              assert.ok(paramValue.error.failedValidation)
+              assert.deepEqual(paramValue.error.errors, [
+                {
+                  code: 'INVALID_FORMAT',
+                  params: ['alwaysFails', 'shouldFail'],
+                  message: "Object didn't pass validation for format alwaysFails: shouldFail",
+                  path: ['customFormat']
+                }
+              ]);
+              assert.deepEqual(req.body, paramValue.raw);
+              assert.deepEqual(req.body, paramValue.value);
+            })
+            .then(resolve, reject);
+        });
       });
     });
 
@@ -476,69 +492,73 @@ function runTests (mode) {
       });
 
       describe('should return errors for an invalid document', function () {
-        it('does not validate against JSON Schema', function (done) {
+        it('does not validate against JSON Schema', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           delete cSwagger.paths;
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              var results = api.validate();
-
-              assert.deepEqual(results.warnings, []);
-              assert.deepEqual(results.errors, [
-                {
-                  code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
-                  message: 'Missing required property: paths',
-                  params: ['paths'],
-                  path: [],
-                  schemaId: 'http://swagger.io/v2/schema.json#',
-                  title: 'A JSON Schema for Swagger 2.0 API.'
-                }
-              ]);
-            })
-            .then(done, done);
-        });
-
-        describe('array type missing required items property', function () {
-          function validateBrokenArray (cSwagger, path, done) {
+          await new Promise((resolve, reject) => {
             Sway.create({
               definition: cSwagger
             })
               .then(function (api) {
                 var results = api.validate();
 
-                // Validate that all warnings are unused definitions
-                _.forEach(results.warnings, function (warning) {
-                  assert.equal(warning.code, 'UNUSED_DEFINITION');
-                });
-
+                assert.deepEqual(results.warnings, []);
                 assert.deepEqual(results.errors, [
                   {
                     code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
-                    message: 'Missing required property: items',
-                    path: path
+                    message: 'Missing required property: paths',
+                    params: ['paths'],
+                    path: [],
+                    schemaId: 'http://swagger.io/v2/schema.json#',
+                    title: 'A JSON Schema for Swagger 2.0 API.'
                   }
                 ]);
               })
-              .then(done, done);
+              .then(resolve, reject);
+          });
+        });
+
+        describe('array type missing required items property', function () {
+          async function validateBrokenArray (cSwagger, path) {
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
+              })
+                .then(function (api) {
+                  var results = api.validate();
+
+                  // Validate that all warnings are unused definitions
+                  _.forEach(results.warnings, function (warning) {
+                    assert.equal(warning.code, 'UNUSED_DEFINITION');
+                  });
+
+                  assert.deepEqual(results.errors, [
+                    {
+                      code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
+                      message: 'Missing required property: items',
+                      path: path
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           }
 
           describe('schema definitions', function () {
             describe('array', function () {
-              it('no items', function (done) {
+              it('no items', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.definitions.Pet = {
                   type: 'array'
                 };
 
-                validateBrokenArray(cSwagger, ['definitions', 'Pet'], done);
+                await validateBrokenArray(cSwagger, ['definitions', 'Pet']);
               });
 
-              it('items object', function (done) {
+              it('items object', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.definitions.Pet = {
@@ -548,10 +568,10 @@ function runTests (mode) {
                   }
                 };
 
-                validateBrokenArray(cSwagger, ['definitions', 'Pet', 'items'], done);
+                await validateBrokenArray(cSwagger, ['definitions', 'Pet', 'items']);
               });
 
-              it('items array', function (done) {
+              it('items array', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.definitions.Pet = {
@@ -563,13 +583,13 @@ function runTests (mode) {
                   ]
                 };
 
-                validateBrokenArray(cSwagger, ['definitions', 'Pet', 'items', '0'], done);
+                await validateBrokenArray(cSwagger, ['definitions', 'Pet', 'items', '0']);
               });
             });
 
             describe('object', function () {
               describe('additionalProperties', function () {
-                it('no items', function (done) {
+                it('no items', async function () {
                   var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                   cSwagger.definitions.Pet = {
@@ -579,10 +599,10 @@ function runTests (mode) {
                     }
                   };
 
-                  validateBrokenArray(cSwagger, ['definitions', 'Pet', 'additionalProperties'], done);
+                  await validateBrokenArray(cSwagger, ['definitions', 'Pet', 'additionalProperties']);
                 });
 
-                it('items object', function (done) {
+                it('items object', async function () {
                   var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                   cSwagger.definitions.Pet = {
@@ -595,10 +615,10 @@ function runTests (mode) {
                     }
                   };
 
-                  validateBrokenArray(cSwagger, ['definitions', 'Pet', 'additionalProperties', 'items'], done);
+                  await validateBrokenArray(cSwagger, ['definitions', 'Pet', 'additionalProperties', 'items']);
                 });
 
-                it('items array', function (done) {
+                it('items array', async function () {
                   var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                   cSwagger.definitions.Pet = {
@@ -613,14 +633,13 @@ function runTests (mode) {
                     }
                   };
 
-                  validateBrokenArray(cSwagger,
-                                      ['definitions', 'Pet', 'additionalProperties', 'items', '0'],
-                                      done);
+                  await validateBrokenArray(cSwagger,
+                    ['definitions', 'Pet', 'additionalProperties', 'items', '0']);
                 });
               });
 
               describe('properties', function () {
-                it('no items', function (done) {
+                it('no items', async function () {
                   var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                   cSwagger.definitions.Pet = {
@@ -632,10 +651,10 @@ function runTests (mode) {
                     }
                   };
 
-                  validateBrokenArray(cSwagger, ['definitions', 'Pet', 'properties', 'aliases'], done);
+                  await validateBrokenArray(cSwagger, ['definitions', 'Pet', 'properties', 'aliases']);
                 });
 
-                it('items object', function (done) {
+                it('items object', async function () {
                   var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                   cSwagger.definitions.Pet = {
@@ -650,10 +669,10 @@ function runTests (mode) {
                     }
                   };
 
-                  validateBrokenArray(cSwagger, ['definitions', 'Pet', 'properties', 'aliases', 'items'], done);
+                  await validateBrokenArray(cSwagger, ['definitions', 'Pet', 'properties', 'aliases', 'items']);
                 });
 
-                it('items array', function (done) {
+                it('items array', async function () {
                   var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                   cSwagger.definitions.Pet = {
@@ -670,12 +689,12 @@ function runTests (mode) {
                     }
                   };
 
-                  validateBrokenArray(cSwagger, ['definitions', 'Pet', 'properties', 'aliases', 'items', '0'], done);
+                  await validateBrokenArray(cSwagger, ['definitions', 'Pet', 'properties', 'aliases', 'items', '0']);
                 });
               });
 
               describe('allOf', function () {
-                it('no items', function (done) {
+                it('no items', async function () {
                   var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                   cSwagger.definitions.Pet = {
@@ -687,10 +706,10 @@ function runTests (mode) {
                     ]
                   };
 
-                  validateBrokenArray(cSwagger, ['definitions', 'Pet', 'allOf', '0'], done);
+                  await validateBrokenArray(cSwagger, ['definitions', 'Pet', 'allOf', '0']);
                 });
 
-                it('items object', function (done) {
+                it('items object', async function () {
                   var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                   cSwagger.definitions.Pet = {
@@ -710,12 +729,11 @@ function runTests (mode) {
                     ]
                   };
 
-                  validateBrokenArray(cSwagger,
-                                      ['definitions', 'Pet', 'allOf', '0', 'properties', 'aliases', 'items'],
-                                      done);
+                  await validateBrokenArray(cSwagger,
+                    ['definitions', 'Pet', 'allOf', '0', 'properties', 'aliases', 'items']);
                 });
 
-                it('items array', function (done) {
+                it('items array', async function () {
                   var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                   cSwagger.definitions.Pet = {
@@ -737,14 +755,13 @@ function runTests (mode) {
                     ]
                   };
 
-                  validateBrokenArray(cSwagger,
-                                      ['definitions', 'Pet', 'allOf', '0', 'properties', 'aliases', 'items', '0'],
-                                      done);
+                  await validateBrokenArray(cSwagger,
+                    ['definitions', 'Pet', 'allOf', '0', 'properties', 'aliases', 'items', '0']);
                 });
               });
             });
 
-            it('recursive', function (done) {
+            it('recursive', async function () {
               var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
               var errorSchema = {
                 type: 'object',
@@ -773,77 +790,79 @@ function runTests (mode) {
                 additionalProperties: errorSchema
               };
 
-              Sway.create({
-                definition: cSwagger
-              })
-                .then(function (api) {
-                  var results = api.validate();
-
-                  // Validate that all warnings are unused definitions
-                  _.forEach(results.warnings, function (warning) {
-                    assert.equal(warning.code, 'UNUSED_DEFINITION');
-                  });
-
-                  assert.deepEqual(results.errors, [
-                    {
-                      code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
-                      message: 'Missing required property: items',
-                      path: ['definitions', 'Pet', 'additionalProperties', 'additionalProperties']
-                    },
-                    {
-                      code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
-                      message: 'Missing required property: items',
-                      path: ['definitions', 'Pet', 'additionalProperties', 'allOf', '0']
-                    },
-                    {
-                      code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
-                      message: 'Missing required property: items',
-                      path: ['definitions', 'Pet', 'additionalProperties', 'properties', 'aliases']
-                    },
-                    {
-                      code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
-                      message: 'Missing required property: items',
-                      path: ['definitions', 'Pet', 'allOf', '0', 'additionalProperties']
-                    },
-                    {
-                      code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
-                      message: 'Missing required property: items',
-                      path: ['definitions', 'Pet', 'allOf', '0', 'allOf', '0']
-                    },
-                    {
-                      code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
-                      message: 'Missing required property: items',
-                      path: ['definitions', 'Pet', 'allOf', '0', 'properties', 'aliases']
-                    },
-                    {
-                      code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
-                      message: 'Missing required property: items',
-                      path: ['definitions', 'Pet', 'properties', 'aliases', 'additionalProperties']
-                    },
-                    {
-                      code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
-                      message: 'Missing required property: items',
-                      path: ['definitions', 'Pet', 'properties', 'aliases', 'allOf', '0']
-                    },
-                    {
-                      code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
-                      message: 'Missing required property: items',
-                      path: ['definitions', 'Pet', 'properties', 'aliases', 'properties', 'aliases']
-                    }
-                  ]);
+              await new Promise((resolve, reject) => {
+                Sway.create({
+                  definition: cSwagger
                 })
-                .then(done, done);
+                  .then(function (api) {
+                    var results = api.validate();
+
+                    // Validate that all warnings are unused definitions
+                    _.forEach(results.warnings, function (warning) {
+                      assert.equal(warning.code, 'UNUSED_DEFINITION');
+                    });
+
+                    assert.deepEqual(results.errors, [
+                      {
+                        code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
+                        message: 'Missing required property: items',
+                        path: ['definitions', 'Pet', 'additionalProperties', 'additionalProperties']
+                      },
+                      {
+                        code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
+                        message: 'Missing required property: items',
+                        path: ['definitions', 'Pet', 'additionalProperties', 'allOf', '0']
+                      },
+                      {
+                        code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
+                        message: 'Missing required property: items',
+                        path: ['definitions', 'Pet', 'additionalProperties', 'properties', 'aliases']
+                      },
+                      {
+                        code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
+                        message: 'Missing required property: items',
+                        path: ['definitions', 'Pet', 'allOf', '0', 'additionalProperties']
+                      },
+                      {
+                        code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
+                        message: 'Missing required property: items',
+                        path: ['definitions', 'Pet', 'allOf', '0', 'allOf', '0']
+                      },
+                      {
+                        code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
+                        message: 'Missing required property: items',
+                        path: ['definitions', 'Pet', 'allOf', '0', 'properties', 'aliases']
+                      },
+                      {
+                        code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
+                        message: 'Missing required property: items',
+                        path: ['definitions', 'Pet', 'properties', 'aliases', 'additionalProperties']
+                      },
+                      {
+                        code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
+                        message: 'Missing required property: items',
+                        path: ['definitions', 'Pet', 'properties', 'aliases', 'allOf', '0']
+                      },
+                      {
+                        code: 'OBJECT_MISSING_REQUIRED_PROPERTY',
+                        message: 'Missing required property: items',
+                        path: ['definitions', 'Pet', 'properties', 'aliases', 'properties', 'aliases']
+                      }
+                    ]);
+                  })
+                  .then(resolve, reject);
+              });
             });
           });
 
           describe('parameter definitions', function () {
             describe('global', function () {
-              it('body parameter', function (done) {
+              it('body parameter', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.parameters = {
                   petInBody: {
-                      in: 'body',
+                    in: 'body',
                     name: 'body',
                     description: 'A Pet',
                     required: true,
@@ -857,10 +876,10 @@ function runTests (mode) {
                   }
                 };
 
-                validateBrokenArray(cSwagger, ['parameters', 'petInBody', 'schema', 'properties', 'aliases'], done);
+                await validateBrokenArray(cSwagger, ['parameters', 'petInBody', 'schema', 'properties', 'aliases']);
               });
 
-              it('non-body parameter', function (done) {
+              it('non-body parameter', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.parameters = {
@@ -869,17 +888,17 @@ function runTests (mode) {
 
                 delete cSwagger.parameters.petStatus.items;
 
-                validateBrokenArray(cSwagger, ['parameters', 'petStatus'], done);
+                await validateBrokenArray(cSwagger, ['parameters', 'petStatus']);
               });
             });
 
             describe('path-level', function () {
-              it('body parameter', function (done) {
+              it('body parameter', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.paths['/pet'].parameters = [
                   {
-                      in: 'body',
+                    in: 'body',
                     name: 'body',
                     description: 'A Pet',
                     required: true,
@@ -893,12 +912,11 @@ function runTests (mode) {
                   }
                 ];
 
-                validateBrokenArray(cSwagger,
-                                    ['paths', '/pet', 'parameters', '0', 'schema', 'properties', 'aliases'],
-                                    done);
+                await validateBrokenArray(cSwagger,
+                  ['paths', '/pet', 'parameters', '0', 'schema', 'properties', 'aliases']);
               });
 
-              it('non-body parameter', function (done) {
+              it('non-body parameter', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.paths['/pet'].parameters = [
@@ -907,34 +925,33 @@ function runTests (mode) {
 
                 delete cSwagger.paths['/pet'].parameters[0].items;
 
-                validateBrokenArray(cSwagger, ['paths', '/pet', 'parameters', '0'], done);
+                await validateBrokenArray(cSwagger, ['paths', '/pet', 'parameters', '0']);
               });
             });
 
             describe('operation', function () {
-              it('body parameter', function (done) {
+              it('body parameter', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 delete cSwagger.paths['/user/createWithArray'].post.parameters[0].schema.items;
 
-                validateBrokenArray(cSwagger,
-                                    ['paths', '/user/createWithArray', 'post', 'parameters', '0', 'schema'],
-                                    done);
+                await validateBrokenArray(cSwagger,
+                  ['paths', '/user/createWithArray', 'post', 'parameters', '0', 'schema']);
               });
 
-              it('non-body parameter', function (done) {
+              it('non-body parameter', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 delete cSwagger.paths['/pet/findByStatus'].get.parameters[0].items;
 
-                validateBrokenArray(cSwagger, ['paths', '/pet/findByStatus', 'get', 'parameters', '0'], done);
+                await validateBrokenArray(cSwagger, ['paths', '/pet/findByStatus', 'get', 'parameters', '0']);
               });
             });
           });
 
           describe('responses', function () {
             describe('global', function () {
-              it('headers', function (done) {
+              it('headers', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.responses = {
@@ -948,10 +965,10 @@ function runTests (mode) {
                   }
                 };
 
-                validateBrokenArray(cSwagger, ['responses', 'success', 'headers', 'X-Broken-Array'], done);
+                await validateBrokenArray(cSwagger, ['responses', 'success', 'headers', 'X-Broken-Array']);
               });
 
-              it('schema definition', function (done) {
+              it('schema definition', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.responses = {
@@ -963,12 +980,12 @@ function runTests (mode) {
                   }
                 };
 
-                validateBrokenArray(cSwagger, ['responses', 'success', 'schema'], done);
+                await validateBrokenArray(cSwagger, ['responses', 'success', 'schema']);
               });
             });
 
             describe('operation', function () {
-              it('headers', function (done) {
+              it('headers', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 cSwagger.paths['/pet/findByStatus'].get.responses['200'].headers = {
@@ -977,27 +994,25 @@ function runTests (mode) {
                   }
                 };
 
-                validateBrokenArray(cSwagger,
-                                    [
-                                      'paths',
-                                      '/pet/findByStatus',
-                                      'get',
-                                      'responses',
-                                      '200',
-                                      'headers',
-                                      'X-Broken-Array'
-                                    ],
-                                    done);
+                await validateBrokenArray(cSwagger,
+                  [
+                    'paths',
+                    '/pet/findByStatus',
+                    'get',
+                    'responses',
+                    '200',
+                    'headers',
+                    'X-Broken-Array'
+                  ]);
               });
 
-              it('schema definition', function (done) {
+              it('schema definition', async function () {
                 var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
                 delete cSwagger.paths['/pet/findByStatus'].get.responses['200'].schema.items;
 
-                validateBrokenArray(cSwagger,
-                                    ['paths', '/pet/findByStatus', 'get', 'responses', '200', 'schema'],
-                                    done);
+                await validateBrokenArray(cSwagger,
+                  ['paths', '/pet/findByStatus', 'get', 'responses', '200', 'schema']);
               });
             });
           });
@@ -1014,7 +1029,7 @@ function runTests (mode) {
             });
           }
 
-          it('definition (direct)', function (done) {
+          it('definition (direct)', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             cSwagger.definitions.A = {
@@ -1032,33 +1047,35 @@ function runTests (mode) {
               ]
             };
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.warnings, []);
-
-                validateErrors(results.errors, [
-                  {
-                    code: 'CIRCULAR_INHERITANCE',
-                    lineage: ['#/definitions/B', '#/definitions/A', '#/definitions/B'],
-                    message: 'Schema object inherits from itself: #/definitions/B',
-                    path: ['definitions', 'B']
-                  },
-                  {
-                    code: 'CIRCULAR_INHERITANCE',
-                    lineage: ['#/definitions/A', '#/definitions/B', '#/definitions/A'],
-                    message: 'Schema object inherits from itself: #/definitions/A',
-                    path: ['definitions', 'A']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.warnings, []);
+
+                  validateErrors(results.errors, [
+                    {
+                      code: 'CIRCULAR_INHERITANCE',
+                      lineage: ['#/definitions/B', '#/definitions/A', '#/definitions/B'],
+                      message: 'Schema object inherits from itself: #/definitions/B',
+                      path: ['definitions', 'B']
+                    },
+                    {
+                      code: 'CIRCULAR_INHERITANCE',
+                      lineage: ['#/definitions/A', '#/definitions/B', '#/definitions/A'],
+                      message: 'Schema object inherits from itself: #/definitions/A',
+                      path: ['definitions', 'A']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
 
-          it('definition (indirect)', function (done) {
+          it('definition (indirect)', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             cSwagger.definitions.A = {
@@ -1083,38 +1100,40 @@ function runTests (mode) {
               ]
             };
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.warnings, []);
-                validateErrors(results.errors, [
-                  {
-                    code: 'CIRCULAR_INHERITANCE',
-                    lineage: ['#/definitions/C', '#/definitions/A', '#/definitions/B', '#/definitions/C'],
-                    message: 'Schema object inherits from itself: #/definitions/C',
-                    path: ['definitions', 'C']
-                  },
-                  {
-                    code: 'CIRCULAR_INHERITANCE',
-                    lineage: ['#/definitions/B', '#/definitions/C', '#/definitions/A', '#/definitions/B'],
-                    message: 'Schema object inherits from itself: #/definitions/B',
-                    path: ['definitions', 'B']
-                  },
-                  {
-                    code: 'CIRCULAR_INHERITANCE',
-                    lineage: ['#/definitions/A', '#/definitions/B', '#/definitions/C', '#/definitions/A'],
-                    message: 'Schema object inherits from itself: #/definitions/A',
-                    path: ['definitions', 'A']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.warnings, []);
+                  validateErrors(results.errors, [
+                    {
+                      code: 'CIRCULAR_INHERITANCE',
+                      lineage: ['#/definitions/C', '#/definitions/A', '#/definitions/B', '#/definitions/C'],
+                      message: 'Schema object inherits from itself: #/definitions/C',
+                      path: ['definitions', 'C']
+                    },
+                    {
+                      code: 'CIRCULAR_INHERITANCE',
+                      lineage: ['#/definitions/B', '#/definitions/C', '#/definitions/A', '#/definitions/B'],
+                      message: 'Schema object inherits from itself: #/definitions/B',
+                      path: ['definitions', 'B']
+                    },
+                    {
+                      code: 'CIRCULAR_INHERITANCE',
+                      lineage: ['#/definitions/A', '#/definitions/B', '#/definitions/C', '#/definitions/A'],
+                      message: 'Schema object inherits from itself: #/definitions/A',
+                      path: ['definitions', 'A']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
 
-          it('inline schema', function (done) {
+          it('inline schema', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             cSwagger.definitions.A = {
@@ -1129,26 +1148,28 @@ function runTests (mode) {
               ]
             };
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.warnings, []);
-                assert.deepEqual(results.errors, [
-                  {
-                    code: 'CIRCULAR_INHERITANCE',
-                    lineage: ['#/definitions/A/allOf/0', '#/definitions/A/allOf/0'],
-                    message: 'Schema object inherits from itself: #/definitions/A/allOf/0',
-                    path: ['definitions', 'A', 'allOf', '0']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.warnings, []);
+                  assert.deepEqual(results.errors, [
+                    {
+                      code: 'CIRCULAR_INHERITANCE',
+                      lineage: ['#/definitions/A/allOf/0', '#/definitions/A/allOf/0'],
+                      message: 'Schema object inherits from itself: #/definitions/A/allOf/0',
+                      path: ['definitions', 'A', 'allOf', '0']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
 
-          it('not composition/inheritance', function (done) {
+          it('not composition/inheritance', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             cSwagger.definitions.Pet.properties.friends = {
@@ -1158,25 +1179,27 @@ function runTests (mode) {
               }
             };
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.errors, []);
-                assert.deepEqual(results.warnings, []);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.errors, []);
+                  assert.deepEqual(results.warnings, []);
+                })
+                .then(resolve, reject);
+            });
           });
         });
 
         describe('default values fail JSON Schema validation', function () {
-          it('schema-like object (non-body parameter)', function (done) {
+          it('schema-like object (non-body parameter)', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             cSwagger.paths['/pet'].post.parameters.push({
-                in: 'query',
+              in: 'query',
               name: 'status',
               description: 'The Pet status',
               required: true,
@@ -1184,53 +1207,57 @@ function runTests (mode) {
               default: 123
             });
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.warnings, []);
-                assert.deepEqual(results.errors, [
-                  {
-                    code: 'INVALID_TYPE',
-                    description: 'The Pet status', // Copied in for non-body parameters
-                    message: 'Expected type string but found type integer',
-                    params: ['string', 'integer'],
-                    path: ['paths', '/pet', 'post', 'parameters', '1', 'default']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.warnings, []);
+                  assert.deepEqual(results.errors, [
+                    {
+                      code: 'INVALID_TYPE',
+                      description: 'The Pet status', // Copied in for non-body parameters
+                      message: 'Expected type string but found type integer',
+                      params: ['string', 'integer'],
+                      path: ['paths', '/pet', 'post', 'parameters', '1', 'default']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
 
-          it('schema object', function (done) {
+          it('schema object', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             cSwagger.definitions.Pet.properties.name.default = 123;
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.warnings, []);
-                assert.deepEqual(results.errors, [
-                  {
-                    code: 'INVALID_TYPE',
-                    message: 'Expected type string but found type integer',
-                    params: ['string', 'integer'],
-                    path: ['definitions', 'Pet', 'properties', 'name', 'default']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.warnings, []);
+                  assert.deepEqual(results.errors, [
+                    {
+                      code: 'INVALID_TYPE',
+                      message: 'Expected type string but found type integer',
+                      params: ['string', 'integer'],
+                      path: ['definitions', 'Pet', 'properties', 'name', 'default']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
         });
 
         describe('duplicate operation parameter', function () {
-          it('operation-level', function (done) {
+          it('operation-level', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
             var cParam = _.cloneDeep(cSwagger.paths['/pet/findByStatus'].get.parameters[0]);
 
@@ -1239,25 +1266,27 @@ function runTests (mode) {
 
             cSwagger.paths['/pet/findByStatus'].get.parameters.push(cParam);
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.warnings, []);
-                assert.deepEqual(results.errors, [
-                  {
-                    code: 'DUPLICATE_PARAMETER',
-                    message: 'Operation cannot have duplicate parameters: #/paths/~1pet~1findByStatus/get/parameters/1',
-                    path: ['paths', '/pet/findByStatus', 'get', 'parameters', '1']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.warnings, []);
+                  assert.deepEqual(results.errors, [
+                    {
+                      code: 'DUPLICATE_PARAMETER',
+                      message: 'Operation cannot have duplicate parameters: #/paths/~1pet~1findByStatus/get/parameters/1',
+                      path: ['paths', '/pet/findByStatus', 'get', 'parameters', '1']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
 
-          it('path-level', function (done) {
+          it('path-level', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
             var cParam = _.cloneDeep(cSwagger.paths['/pet/{petId}'].parameters[0]);
 
@@ -1266,6 +1295,35 @@ function runTests (mode) {
 
             cSwagger.paths['/pet/{petId}'].parameters.push(cParam);
 
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
+              })
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.warnings, []);
+                  assert.deepEqual(results.errors, [
+                    {
+                      code: 'DUPLICATE_PARAMETER',
+                      message: 'Operation cannot have duplicate parameters: #/paths/~1pet~1{petId}/parameters/1',
+                      path: ['paths', '/pet/{petId}', 'parameters', '1']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
+          });
+        });
+
+        it('invalid JSON Reference', async function () {
+          var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+
+          cSwagger.paths['/something'] = {
+            $ref: 'http://:8080'
+          };
+
+          await new Promise((resolve, reject) => {
             Sway.create({
               definition: cSwagger
             })
@@ -1275,176 +1333,161 @@ function runTests (mode) {
                 assert.deepEqual(results.warnings, []);
                 assert.deepEqual(results.errors, [
                   {
-                    code: 'DUPLICATE_PARAMETER',
-                    message: 'Operation cannot have duplicate parameters: #/paths/~1pet~1{petId}/parameters/1',
-                    path: ['paths', '/pet/{petId}', 'parameters', '1']
+                    code: 'INVALID_REFERENCE',
+                    message: 'HTTP URIs must have a host.',
+                    path: ['paths', '/something', '$ref']
                   }
                 ]);
               })
-              .then(done, done);
+              .then(resolve, reject);
           });
         });
 
-        it('invalid JSON Reference', function (done) {
-          var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
-
-          cSwagger.paths['/something'] = {
-            $ref: 'http://:8080'
-          };
-
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              var results = api.validate();
-
-              assert.deepEqual(results.warnings, []);
-              assert.deepEqual(results.errors, [
-                {
-                  code: 'INVALID_REFERENCE',
-                  message: 'HTTP URIs must have a host.',
-                  path: ['paths', '/something', '$ref']
-                }
-              ]);
-            })
-            .then(done, done);
-        });
-
-        it('path parameter in pattern is empty', function (done) {
+        it('path parameter in pattern is empty', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.paths['/invalid/{}'] = {};
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              var results = api.validate();
-
-              assert.deepEqual(results.warnings, []);
-              assert.deepEqual(results.errors, [
-                {
-                  code: 'EMPTY_PATH_PARAMETER_DECLARATION',
-                  message: 'Path parameter declaration cannot be empty: /invalid/{}',
-                  path: ['paths', '/invalid/{}']
-                }
-              ]);
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                var results = api.validate();
+
+                assert.deepEqual(results.warnings, []);
+                assert.deepEqual(results.errors, [
+                  {
+                    code: 'EMPTY_PATH_PARAMETER_DECLARATION',
+                    message: 'Path parameter declaration cannot be empty: /invalid/{}',
+                    path: ['paths', '/invalid/{}']
+                  }
+                ]);
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('missing path parameter declaration', function (done) {
+        it('missing path parameter declaration', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.paths['/pet/{petId}'].get.parameters = [
             {
               description: 'Superfluous path parameter',
-                in: 'path',
+              in: 'path',
               name: 'petId2',
               required: true,
               type: 'string'
             }
           ];
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              var results = api.validate();
-
-              assert.deepEqual(results.warnings, []);
-              assert.deepEqual(results.errors, [
-                {
-                  code: 'MISSING_PATH_PARAMETER_DECLARATION',
-                  message: 'Path parameter is defined but is not declared: petId2',
-                  path: ['paths', '/pet/{petId}', 'get', 'parameters', '0']
-                }
-              ]);
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                var results = api.validate();
+
+                assert.deepEqual(results.warnings, []);
+                assert.deepEqual(results.errors, [
+                  {
+                    code: 'MISSING_PATH_PARAMETER_DECLARATION',
+                    message: 'Path parameter is defined but is not declared: petId2',
+                    path: ['paths', '/pet/{petId}', 'get', 'parameters', '0']
+                  }
+                ]);
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('missing path parameter definition', function (done) {
+        it('missing path parameter definition', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.paths['/pet/{petId}'].parameters = [];
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              var results = api.validate();
-
-              assert.deepEqual(results.warnings, []);
-              assert.deepEqual(results.errors, [
-                {
-                  code: 'MISSING_PATH_PARAMETER_DEFINITION',
-                  message: 'Path parameter is declared but is not defined: petId',
-                  path: ['paths', '/pet/{petId}', 'get']
-                },
-                {
-                  code: 'MISSING_PATH_PARAMETER_DEFINITION',
-                  message: 'Path parameter is declared but is not defined: petId',
-                  path: ['paths', '/pet/{petId}', 'post']
-                },
-                {
-                  code: 'MISSING_PATH_PARAMETER_DEFINITION',
-                  message: 'Path parameter is declared but is not defined: petId',
-                  path: ['paths', '/pet/{petId}', 'delete']
-                }
-              ]);
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                var results = api.validate();
+
+                assert.deepEqual(results.warnings, []);
+                assert.deepEqual(results.errors, [
+                  {
+                    code: 'MISSING_PATH_PARAMETER_DEFINITION',
+                    message: 'Path parameter is declared but is not defined: petId',
+                    path: ['paths', '/pet/{petId}', 'get']
+                  },
+                  {
+                    code: 'MISSING_PATH_PARAMETER_DEFINITION',
+                    message: 'Path parameter is declared but is not defined: petId',
+                    path: ['paths', '/pet/{petId}', 'post']
+                  },
+                  {
+                    code: 'MISSING_PATH_PARAMETER_DEFINITION',
+                    message: 'Path parameter is declared but is not defined: petId',
+                    path: ['paths', '/pet/{petId}', 'delete']
+                  }
+                ]);
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('multiple equivalent paths', function (done) {
+        it('multiple equivalent paths', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.paths['/pet/{notPetId}'] = {};
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              var results = api.validate();
-
-              assert.deepEqual(results.warnings, []);
-              assert.deepEqual(results.errors, [
-                {
-                  code: 'EQUIVALENT_PATH',
-                  message: 'Equivalent path already exists: /pet/{notPetId}',
-                  path: ['paths', '/pet/{notPetId}']
-                }
-              ]);
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                var results = api.validate();
+
+                assert.deepEqual(results.warnings, []);
+                assert.deepEqual(results.errors, [
+                  {
+                    code: 'EQUIVALENT_PATH',
+                    message: 'Equivalent path already exists: /pet/{notPetId}',
+                    path: ['paths', '/pet/{notPetId}']
+                  }
+                ]);
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('multiple operations with the same operationId', function (done) {
+        it('multiple operations with the same operationId', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
           var operationId = cSwagger.paths['/pet'].post.operationId;
 
           cSwagger.paths['/pet'].put.operationId = operationId;
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              var results = api.validate();
-
-              assert.deepEqual(results.warnings, []);
-              assert.deepEqual(results.errors, [
-                {
-                  code: 'DUPLICATE_OPERATIONID',
-                  message: 'Cannot have multiple operations with the same operationId: ' + operationId,
-                  path: ['paths', '/pet', 'put', 'operationId']
-                }
-              ]);
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                var results = api.validate();
+
+                assert.deepEqual(results.warnings, []);
+                assert.deepEqual(results.errors, [
+                  {
+                    code: 'DUPLICATE_OPERATIONID',
+                    message: 'Cannot have multiple operations with the same operationId: ' + operationId,
+                    path: ['paths', '/pet', 'put', 'operationId']
+                  }
+                ]);
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('operation has multiple body parameters', function (done) {
+        it('operation has multiple body parameters', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
           var dBodyParam = _.cloneDeep(cSwagger.paths['/pet'].post.parameters[0]);
 
@@ -1452,55 +1495,59 @@ function runTests (mode) {
 
           cSwagger.paths['/pet'].post.parameters.push(dBodyParam);
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              var results = api.validate();
-
-              assert.deepEqual(results.warnings, []);
-              assert.deepEqual(results.errors, [
-                {
-                  code: 'MULTIPLE_BODY_PARAMETERS',
-                  message: 'Operation cannot have multiple body parameters',
-                  path: ['paths', '/pet', 'post']
-                }
-              ]);
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                var results = api.validate();
+
+                assert.deepEqual(results.warnings, []);
+                assert.deepEqual(results.errors, [
+                  {
+                    code: 'MULTIPLE_BODY_PARAMETERS',
+                    message: 'Operation cannot have multiple body parameters',
+                    path: ['paths', '/pet', 'post']
+                  }
+                ]);
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('operation can have body or form parameter but not both', function (done) {
+        it('operation can have body or form parameter but not both', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.paths['/pet'].post.parameters.push({
             name: 'name',
-              in: 'formData',
+            in: 'formData',
             description: 'The Pet name',
             required: true,
             type: 'string'
           });
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              var results = api.validate();
-
-              assert.deepEqual(results.warnings, []);
-              assert.deepEqual(results.errors, [
-                {
-                  code: 'INVALID_PARAMETER_COMBINATION',
-                  message: 'Operation cannot have a body parameter and a formData parameter',
-                  path: ['paths', '/pet', 'post']
-                }
-              ]);
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                var results = api.validate();
+
+                assert.deepEqual(results.warnings, []);
+                assert.deepEqual(results.errors, [
+                  {
+                    code: 'INVALID_PARAMETER_COMBINATION',
+                    message: 'Operation cannot have a body parameter and a formData parameter',
+                    path: ['paths', '/pet', 'post']
+                  }
+                ]);
+              })
+              .then(resolve, reject);
+          });
         });
 
         describe('missing required property definition', function () {
-          it('allOf', function (done) {
+          it('allOf', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             delete cSwagger.definitions.Pet.properties.name;
@@ -1515,102 +1562,110 @@ function runTests (mode) {
 
             delete cSwagger.definitions.Pet.properties;
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.warnings, []);
-                assert.deepEqual(results.errors, [
-                  {
-                    code: 'OBJECT_MISSING_REQUIRED_PROPERTY_DEFINITION',
-                    message: 'Missing required property definition: name',
-                    path: ['definitions', 'Pet']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.warnings, []);
+                  assert.deepEqual(results.errors, [
+                    {
+                      code: 'OBJECT_MISSING_REQUIRED_PROPERTY_DEFINITION',
+                      message: 'Missing required property definition: name',
+                      path: ['definitions', 'Pet']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
 
-          it('properties', function (done) {
+          it('properties', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             delete cSwagger.definitions.Pet.properties.name;
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.warnings, []);
-                assert.deepEqual(results.errors, [
-                  {
-                    code: 'OBJECT_MISSING_REQUIRED_PROPERTY_DEFINITION',
-                    message: 'Missing required property definition: name',
-                    path: ['definitions', 'Pet']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.warnings, []);
+                  assert.deepEqual(results.errors, [
+                    {
+                      code: 'OBJECT_MISSING_REQUIRED_PROPERTY_DEFINITION',
+                      message: 'Missing required property definition: name',
+                      path: ['definitions', 'Pet']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
         });
 
         describe('unused definitions', function () {
-          it('definition', function (done) {
+          it('definition', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             cSwagger.definitions.Missing = {};
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.errors, []);
-                assert.deepEqual(results.warnings, [
-                  {
-                    code: 'UNUSED_DEFINITION',
-                    message: 'Definition is not used: #/definitions/Missing',
-                    path: ['definitions', 'Missing']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.errors, []);
+                  assert.deepEqual(results.warnings, [
+                    {
+                      code: 'UNUSED_DEFINITION',
+                      message: 'Definition is not used: #/definitions/Missing',
+                      path: ['definitions', 'Missing']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
 
-          it('parameter', function (done) {
+          it('parameter', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             cSwagger.parameters = {
               missing: {
                 name: 'missing',
-                  in: 'query',
+                in: 'query',
                 type: 'string'
               }
             };
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.errors, []);
-                assert.deepEqual(results.warnings, [
-                  {
-                    code: 'UNUSED_DEFINITION',
-                    message: 'Definition is not used: #/parameters/missing',
-                    path: ['parameters', 'missing']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.errors, []);
+                  assert.deepEqual(results.warnings, [
+                    {
+                      code: 'UNUSED_DEFINITION',
+                      message: 'Definition is not used: #/parameters/missing',
+                      path: ['parameters', 'missing']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
 
-          it('response', function (done) {
+          it('response', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             cSwagger.responses = {
@@ -1619,204 +1674,220 @@ function runTests (mode) {
               }
             };
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.errors, []);
-                assert.deepEqual(results.warnings, [
-                  {
-                    code: 'UNUSED_DEFINITION',
-                    message: 'Definition is not used: #/responses/Missing',
-                    path: ['responses', 'Missing']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.errors, []);
+                  assert.deepEqual(results.warnings, [
+                    {
+                      code: 'UNUSED_DEFINITION',
+                      message: 'Definition is not used: #/responses/Missing',
+                      path: ['responses', 'Missing']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
 
-          it('securityDefinition', function (done) {
+          it('securityDefinition', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             cSwagger.securityDefinitions.missing = {
               type: 'apiKey',
               name: 'api_key',
-                in: 'header'
+              in: 'header'
             };
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.errors, []);
-                assert.deepEqual(results.warnings, [
-                  {
-                    code: 'UNUSED_DEFINITION',
-                    message: 'Definition is not used: #/securityDefinitions/missing',
-                    path: ['securityDefinitions', 'missing']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.errors, []);
+                  assert.deepEqual(results.warnings, [
+                    {
+                      code: 'UNUSED_DEFINITION',
+                      message: 'Definition is not used: #/securityDefinitions/missing',
+                      path: ['securityDefinitions', 'missing']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
 
-          it('security scope', function (done) {
+          it('security scope', async function () {
             var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
             cSwagger.securityDefinitions.petstore_auth.scopes.missing = 'I am missing';
 
-            Sway.create({
-              definition: cSwagger
-            })
-              .then(function (api) {
-                var results = api.validate();
-
-                assert.deepEqual(results.errors, []);
-                assert.deepEqual(results.warnings, [
-                  {
-                    code: 'UNUSED_DEFINITION',
-                    message: 'Definition is not used: #/securityDefinitions/petstore_auth/scopes/missing',
-                    path: ['securityDefinitions', 'petstore_auth', 'scopes', 'missing']
-                  }
-                ]);
+            await new Promise((resolve, reject) => {
+              Sway.create({
+                definition: cSwagger
               })
-              .then(done, done);
+                .then(function (api) {
+                  var results = api.validate();
+
+                  assert.deepEqual(results.errors, []);
+                  assert.deepEqual(results.warnings, [
+                    {
+                      code: 'UNUSED_DEFINITION',
+                      message: 'Definition is not used: #/securityDefinitions/petstore_auth/scopes/missing',
+                      path: ['securityDefinitions', 'petstore_auth', 'scopes', 'missing']
+                    }
+                  ]);
+                })
+                .then(resolve, reject);
+            });
           });
         });
 
         describe('unresolvable references', function () {
           describe('json reference', function () {
-            it('local', function (done) {
+            it('local', async function () {
               var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
               cSwagger.paths['/pet'].post.parameters[0].schema.$ref = '#/definitions/Missing';
 
-              Sway.create({
-                definition: cSwagger
-              })
-                .then(function (api) {
-                  var results = api.validate();
-
-                  assert.deepEqual(results.warnings, []);
-                  assert.deepEqual(results.errors, [
-                    {
-                      code: 'UNRESOLVABLE_REFERENCE',
-                      message: 'Reference could not be resolved: #/definitions/Missing',
-                      path: ['paths', '/pet', 'post', 'parameters', '0', 'schema', '$ref'],
-                      error: 'JSON Pointer points to missing location: #/definitions/Missing'
-                    }
-                  ]);
+              await new Promise((resolve, reject) => {
+                Sway.create({
+                  definition: cSwagger
                 })
-                .then(done, done);
+                  .then(function (api) {
+                    var results = api.validate();
+
+                    assert.deepEqual(results.warnings, []);
+                    assert.deepEqual(results.errors, [
+                      {
+                        code: 'UNRESOLVABLE_REFERENCE',
+                        message: 'Reference could not be resolved: #/definitions/Missing',
+                        path: ['paths', '/pet', 'post', 'parameters', '0', 'schema', '$ref'],
+                        error: 'JSON Pointer points to missing location: #/definitions/Missing'
+                      }
+                    ]);
+                  })
+                  .then(resolve, reject);
+              });
             });
 
-            it('remote', function (done) {
+            it('remote', async function () {
               var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
               cSwagger.paths['/pet'].post.parameters[0].schema.$ref = 'fake.json';
 
-              Sway.create({
-                definition: cSwagger
-              })
-                .then(function (api) {
-                  var results = api.validate();
-                  var error;
-
-                  assert.deepEqual(results.warnings, []);
-                  assert.equal(results.errors.length, 1);
-
-                  error = results.errors[0];
-
-                  assert.equal(error.code, 'UNRESOLVABLE_REFERENCE');
-                  assert.equal(error.message, 'Reference could not be resolved: fake.json');
-                  assert.deepEqual(error.path, ['paths', '/pet', 'post', 'parameters', '0', 'schema', '$ref']);
-                  assert.ok(_.has(error, 'error'));
+              await new Promise((resolve, reject) => {
+                Sway.create({
+                  definition: cSwagger
                 })
-                .then(done, done);
+                  .then(function (api) {
+                    var results = api.validate();
+                    var error;
+
+                    assert.deepEqual(results.warnings, []);
+                    assert.equal(results.errors.length, 1);
+
+                    error = results.errors[0];
+
+                    assert.equal(error.code, 'UNRESOLVABLE_REFERENCE');
+                    assert.equal(error.message, 'Reference could not be resolved: fake.json');
+                    assert.deepEqual(error.path, ['paths', '/pet', 'post', 'parameters', '0', 'schema', '$ref']);
+                    assert.ok(_.has(error, 'error'));
+                  })
+                  .then(resolve, reject);
+              });
             });
           });
 
           describe('security definition', function () {
-            it('global', function (done) {
+            it('global', async function () {
               var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
               cSwagger.security.push({
                 missing: []
               });
 
-              Sway.create({
-                definition: cSwagger
-              })
-                .then(function (api) {
-                  var results = api.validate();
-
-                  assert.deepEqual(results.warnings, []);
-                  assert.deepEqual(results.errors, [
-                    {
-                      code: 'UNRESOLVABLE_REFERENCE',
-                      message: 'Security definition could not be resolved: missing',
-                      path: ['security', '1', 'missing']
-                    }
-                  ]);
+              await new Promise((resolve, reject) => {
+                Sway.create({
+                  definition: cSwagger
                 })
-                .then(done, done);
+                  .then(function (api) {
+                    var results = api.validate();
+
+                    assert.deepEqual(results.warnings, []);
+                    assert.deepEqual(results.errors, [
+                      {
+                        code: 'UNRESOLVABLE_REFERENCE',
+                        message: 'Security definition could not be resolved: missing',
+                        path: ['security', '1', 'missing']
+                      }
+                    ]);
+                  })
+                  .then(resolve, reject);
+              });
             });
 
-            it('operation-level', function (done) {
+            it('operation-level', async function () {
               var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
               cSwagger.paths['/store/inventory'].get.security.push({
                 missing: []
               });
 
-              Sway.create({
-                definition: cSwagger
-              })
-                .then(function (api) {
-                  var results = api.validate();
-
-                  assert.deepEqual(results.warnings, []);
-                  assert.deepEqual(results.errors, [
-                    {
-                      code: 'UNRESOLVABLE_REFERENCE',
-                      message: 'Security definition could not be resolved: missing',
-                      path: ['paths', '/store/inventory', 'get', 'security', '1', 'missing']
-                    }
-                  ]);
+              await new Promise((resolve, reject) => {
+                Sway.create({
+                  definition: cSwagger
                 })
-                .then(done, done);
+                  .then(function (api) {
+                    var results = api.validate();
+
+                    assert.deepEqual(results.warnings, []);
+                    assert.deepEqual(results.errors, [
+                      {
+                        code: 'UNRESOLVABLE_REFERENCE',
+                        message: 'Security definition could not be resolved: missing',
+                        path: ['paths', '/store/inventory', 'get', 'security', '1', 'missing']
+                      }
+                    ]);
+                  })
+                  .then(resolve, reject);
+              });
             });
           });
 
           describe('security scope definition', function () {
-            it('global', function (done) {
+            it('global', async function () {
               var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
               cSwagger.security[0].petstore_auth.push('missing');
 
-              Sway.create({
-                definition: cSwagger
-              })
-                .then(function (api) {
-                  var results = api.validate();
-
-                  assert.deepEqual(results.warnings, []);
-                  assert.deepEqual(results.errors, [
-                    {
-                      code: 'UNRESOLVABLE_REFERENCE',
-                      message: 'Security scope definition could not be resolved: missing',
-                      path: ['security', '0', 'petstore_auth', '2']
-                    }
-                  ]);
+              await new Promise((resolve, reject) => {
+                Sway.create({
+                  definition: cSwagger
                 })
-                .then(done, done);
+                  .then(function (api) {
+                    var results = api.validate();
+
+                    assert.deepEqual(results.warnings, []);
+                    assert.deepEqual(results.errors, [
+                      {
+                        code: 'UNRESOLVABLE_REFERENCE',
+                        message: 'Security scope definition could not be resolved: missing',
+                        path: ['security', '0', 'petstore_auth', '2']
+                      }
+                    ]);
+                  })
+                  .then(resolve, reject);
+              });
             });
 
-            it('operation-level', function (done) {
+            it('operation-level', async function () {
               var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
               cSwagger.paths['/store/inventory'].get.security.push({
@@ -1825,73 +1896,79 @@ function runTests (mode) {
                 ]
               });
 
-              Sway.create({
-                definition: cSwagger
-              })
-                .then(function (api) {
-                  var results = api.validate();
-
-                  assert.deepEqual(results.warnings, []);
-                  assert.deepEqual(results.errors, [
-                    {
-                      code: 'UNRESOLVABLE_REFERENCE',
-                      message: 'Security scope definition could not be resolved: missing',
-                      path: ['paths', '/store/inventory', 'get', 'security', '1', 'petstore_auth', '0']
-                    }
-                  ]);
+              await new Promise((resolve, reject) => {
+                Sway.create({
+                  definition: cSwagger
                 })
-                .then(done, done);
+                  .then(function (api) {
+                    var results = api.validate();
+
+                    assert.deepEqual(results.warnings, []);
+                    assert.deepEqual(results.errors, [
+                      {
+                        code: 'UNRESOLVABLE_REFERENCE',
+                        message: 'Security scope definition could not be resolved: missing',
+                        path: ['paths', '/store/inventory', 'get', 'security', '1', 'petstore_auth', '0']
+                      }
+                    ]);
+                  })
+                  .then(resolve, reject);
+              });
             });
           });
         });
       });
 
-      it('should return errors for JsonRefs errors', function (done) {
+      it('should return errors for JsonRefs errors', async function () {
         var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
         cSwagger.paths['/pet'].post.parameters[0].schema.$ref = '#definitions/Pet';
 
-        Sway.create({
-          definition: cSwagger
-        })
-          .then(function (api) {
-            assert.deepEqual(api.validate(), {
-              errors: [
-                {
-                  code: 'INVALID_REFERENCE',
-                  message: 'ptr must start with a / or #/',
-                  path: ['paths', '/pet', 'post', 'parameters', '0', 'schema', '$ref']
-                }
-              ],
-              warnings: []
-            });
+        await new Promise((resolve, reject) => {
+          Sway.create({
+            definition: cSwagger
           })
-          .then(done, done);
+            .then(function (api) {
+              assert.deepEqual(api.validate(), {
+                errors: [
+                  {
+                    code: 'INVALID_REFERENCE',
+                    message: 'ptr must start with a / or #/',
+                    path: ['paths', '/pet', 'post', 'parameters', '0', 'schema', '$ref']
+                  }
+                ],
+                warnings: []
+              });
+            })
+            .then(resolve, reject);
+        });
       });
 
-      it('should return warnings for JsonRefs warnings', function (done) {
+      it('should return warnings for JsonRefs warnings', async function () {
         var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
         cSwagger.paths['/pet'].post.parameters[0].schema.extraField = 'This is an extra field';
 
-        Sway.create({
-          definition: cSwagger
-        })
-          .then(function (api) {
-            var results =  api.validate();
-
-            assert.deepEqual(results, {
-              errors: [],
-              warnings: [
-                {
-                  code: 'EXTRA_REFERENCE_PROPERTIES',
-                  message: 'Extra JSON Reference properties will be ignored: extraField',
-                  path: ['paths', '/pet', 'post', 'parameters', '0', 'schema']
-                }
-              ]
-            });
+        await new Promise((resolve, reject) => {
+          Sway.create({
+            definition: cSwagger
           })
-          .then(done, done);
+            .then(function (api) {
+              var results =  api.validate();
+
+              assert.deepEqual(results, {
+                errors: [],
+                warnings: [
+                  {
+                    code: 'EXTRA_REFERENCE_PROPERTIES',
+                    message: 'Extra JSON Reference properties will be ignored: extraField',
+                    path: ['paths', '/pet', 'post', 'parameters', '0', 'schema']
+                  }
+                ]
+              });
+            })
+            .then(resolve, reject);
+        });
       });
 
       describe('human readable errors for invalid schema', function () {
@@ -1903,51 +1980,57 @@ function runTests (mode) {
           assert.equal(results.errors[0].message, 'Not a valid ' + defType + ' definition');
         }
 
-        it('should handle parameter definition', function (done) {
+        it('should handle parameter definition', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.paths['/pet'].post.parameters[0] = {};
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              validateError(api, 'parameter');
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                validateError(api, 'parameter');
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('should handle global parameter definition', function (done) {
+        it('should handle global parameter definition', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.parameters = {
             broken: {}
           };
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              validateError(api, 'parameter');
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                validateError(api, 'parameter');
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('should handle response definition', function (done) {
+        it('should handle response definition', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.paths['/pet'].post.responses.default = {};
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              validateError(api, 'response');
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                validateError(api, 'response');
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('should handle response schema definition', function (done) {
+        it('should handle response schema definition', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.paths['/pet'].post.responses.default = {
@@ -1955,16 +2038,18 @@ function runTests (mode) {
             schema: []
           };
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              validateError(api, 'response');
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                validateError(api, 'response');
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('should handle schema additionalProperties definition', function (done) {
+        it('should handle schema additionalProperties definition', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.definitions.Broken = {
@@ -1972,16 +2057,18 @@ function runTests (mode) {
             additionalProperties: []
           };
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              validateError(api, 'schema additionalProperties');
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                validateError(api, 'schema additionalProperties');
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('should handle schema items definition', function (done) {
+        it('should handle schema items definition', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.definitions.Broken = {
@@ -1994,30 +2081,34 @@ function runTests (mode) {
             }
           };
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              validateError(api, 'schema items');
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                validateError(api, 'schema items');
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('should handle securityDefinitions definition', function (done) {
+        it('should handle securityDefinitions definition', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.securityDefinitions.broken = {};
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              validateError(api, 'securityDefinitions');
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                validateError(api, 'securityDefinitions');
+              })
+              .then(resolve, reject);
+          });
         });
 
-        it('should handle schema items definition', function (done) {
+        it('should handle schema items definition', async function () {
           var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
 
           cSwagger.definitions.Broken = {
@@ -2030,17 +2121,19 @@ function runTests (mode) {
             }
           };
 
-          Sway.create({
-            definition: cSwagger
-          })
-            .then(function (api) {
-              validateError(api, 'schema items');
+          await new Promise((resolve, reject) => {
+            Sway.create({
+              definition: cSwagger
             })
-            .then(done, done);
+              .then(function (api) {
+                validateError(api, 'schema items');
+              })
+              .then(resolve, reject);
+          });
         });
       });
     });
-  });
+});
 }
 
 describe('SwaggerApi', function () {
