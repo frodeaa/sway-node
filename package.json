@@ -37,9 +37,9 @@
   ],
   "devDependencies": {
     "@semantic-release/git": "10.0.1",
-    "@semantic-release/github": "10.3.5",
+    "@semantic-release/github": "11.0.0",
     "eslint": "9.11.1",
-    "semantic-release": "24.1.1"
+    "semantic-release": "24.1.2"
   },
   "dependencies": {
     "debug": "^4.3.4",
