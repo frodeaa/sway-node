@@ -39,7 +39,7 @@
     "@semantic-release/git": "10.0.1",
     "@semantic-release/github": "11.0.3",
     "eslint": "9.32.0",
-    "semantic-release": "24.2.5"
+    "semantic-release": "24.2.7"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
