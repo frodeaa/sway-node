@@ -1,66 +1,66 @@
 {
-  "name": "sway-node",
-  "version": "0.0.0-development",
-  "description": "A library that simplifies Swagger integrations.",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "private": false,
-  "scripts": {
-    "build": "echo",
-    "lint": "eslint -f stylish -c eslint.config.mjs",
-    "semantic-release": "semantic-release",
-    "test": "node --test 'test/**/test-*.js'"
-  },
-  "keywords": [
-    "api",
-    "openapi",
-    "swagger"
-  ],
-  "author": {
-    "name": "Jeremy Whitlock",
-    "email": "jwhitlock@apache.org",
-    "url": "https://github.com/whitlockjc"
-  },
-  "bugs": {
-    "url": "https://github.com/frodeaa/sway-node/issues"
-  },
-  "homepage": "https://github.com/frodeaa/sway-node",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/frodeaa/sway-node.git"
-  },
-  "files": [
-    "index.d.ts",
-    "index.js",
-    "lib"
-  ],
-  "devDependencies": {
-    "@semantic-release/git": "10.0.1",
-    "@semantic-release/github": "11.0.3",
-    "eslint": "9.32.0",
-    "semantic-release": "24.2.7"
-  },
-  "dependencies": {
-    "js-yaml": "^4.1.0",
-    "json-refs": "^3.0.13",
-    "lodash": "^4.17.10",
-    "path-to-regexp": "^6.3.0",
-    "swagger-schema-official": "2.0.0-bab6bed",
-    "z-schema": "^6.0.1"
-  },
-  "resolutions": {
-    "superagent": "9.0.1"
-  },
-  "release": {
-    "branches": [
-      "master"
+    "name": "sway-node",
+    "version": "0.0.0-development",
+    "description": "A library that simplifies Swagger integrations.",
+    "main": "index.js",
+    "types": "index.d.ts",
+    "private": false,
+    "scripts": {
+        "build": "echo",
+        "lint": "biome check",
+        "semantic-release": "semantic-release",
+        "test": "node --test 'test/**/test-*.js'"
+    },
+    "keywords": [
+        "api",
+        "openapi",
+        "swagger"
     ],
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      "@semantic-release/github",
-      "@semantic-release/npm"
-    ]
-  }
+    "author": {
+        "name": "Jeremy Whitlock",
+        "email": "jwhitlock@apache.org",
+        "url": "https://github.com/whitlockjc"
+    },
+    "bugs": {
+        "url": "https://github.com/frodeaa/sway-node/issues"
+    },
+    "homepage": "https://github.com/frodeaa/sway-node",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/frodeaa/sway-node.git"
+    },
+    "files": [
+        "index.d.ts",
+        "index.js",
+        "lib"
+    ],
+    "devDependencies": {
+        "@biomejs/biome": "^2.1.4",
+        "@semantic-release/git": "10.0.1",
+        "@semantic-release/github": "11.0.3",
+        "semantic-release": "24.2.7"
+    },
+    "dependencies": {
+        "js-yaml": "^4.1.0",
+        "json-refs": "^3.0.13",
+        "lodash": "^4.17.10",
+        "path-to-regexp": "^6.3.0",
+        "swagger-schema-official": "2.0.0-bab6bed",
+        "z-schema": "^6.0.1"
+    },
+    "resolutions": {
+        "superagent": "9.0.1"
+    },
+    "release": {
+        "branches": [
+            "master"
+        ],
+        "plugins": [
+            "@semantic-release/commit-analyzer",
+            "@semantic-release/release-notes-generator",
+            "@semantic-release/github",
+            "@semantic-release/npm"
+        ]
+    }
 }

@@ -24,167 +24,172 @@
  * THE SOFTWARE.
  */
 
-'use strict';
-
-const {before, describe, it} = require('node:test');
-var _ = require('lodash');
-var assert = require('assert');
-var tHelpers = require('./helpers');
-var JsonRefs = require('json-refs');
+const { before, describe, it } = require("node:test");
+var _ = require("lodash");
+var assert = require("node:assert");
+var tHelpers = require("./helpers");
+var JsonRefs = require("json-refs");
 var Sway = tHelpers.getSway();
 
-function runTests (mode) {
-  var label = mode === 'with-refs' ? 'with' : 'without';
-  var swaggerApi;
+function runTests(mode) {
+    var label = mode === "with-refs" ? "with" : "without";
+    var swaggerApi;
 
-  before(async () => {
-    await new Promise((done) => {
-      function callback (api) {
-        swaggerApi = api;
+    before(async () => {
+        await new Promise((done) => {
+            function callback(api) {
+                swaggerApi = api;
 
-        done();
-      }
+                done();
+            }
 
-      if (mode === 'with-refs') {
-        tHelpers.getSwaggerApiRelativeRefs(callback);
-      } else {
-        tHelpers.getSwaggerApi(callback);
-      }
+            if (mode === "with-refs") {
+                tHelpers.getSwaggerApiRelativeRefs(callback);
+            } else {
+                tHelpers.getSwaggerApi(callback);
+            }
+        });
     });
-  });
 
-  describe(
-    'should handle Swagger document ' + label + ' relative references',
-    function () {
-      it('should have proper structure', function () {
-        var path = '/pet/{petId}';
-        var pathObject = swaggerApi.getOperation(path, 'get').pathObject;
+    describe(`should handle Swagger document ${label} relative references`, () => {
+        it("should have proper structure", () => {
+            var path = "/pet/{petId}";
+            var pathObject = swaggerApi.getOperation(path, "get").pathObject;
 
-        assert.deepEqual(pathObject.api, swaggerApi);
-        assert.equal(pathObject.path, path);
-        assert.equal(pathObject.ptr, JsonRefs.pathToPtr(['paths', path]));
-        assert.deepEqual(
-          pathObject.definition,
-          swaggerApi.definitionRemotesResolved.paths[path]
-        );
-        assert.deepEqual(
-          pathObject.definitionFullyResolved,
-          swaggerApi.definitionFullyResolved.paths[path]
-        );
+            assert.deepEqual(pathObject.api, swaggerApi);
+            assert.equal(pathObject.path, path);
+            assert.equal(pathObject.ptr, JsonRefs.pathToPtr(["paths", path]));
+            assert.deepEqual(
+                pathObject.definition,
+                swaggerApi.definitionRemotesResolved.paths[path],
+            );
+            assert.deepEqual(
+                pathObject.definitionFullyResolved,
+                swaggerApi.definitionFullyResolved.paths[path],
+            );
 
-        // Make sure they are of the proper type
-        assert.ok(pathObject.regexp instanceof RegExp);
+            // Make sure they are of the proper type
+            assert.ok(pathObject.regexp instanceof RegExp);
 
-        // Make sure they have the proper keys
-        assert.equal(1, pathObject.regexp.keys.length);
-        assert.equal('petId', pathObject.regexp.keys[0].name);
+            // Make sure they have the proper keys
+            assert.equal(1, pathObject.regexp.keys.length);
+            assert.equal("petId", pathObject.regexp.keys[0].name);
 
-        // Make sure they match the expected URLs
-        assert.ok(
-          _.isArray(
-            pathObject.regexp.exec(
-              swaggerApi.definitionFullyResolved.basePath + '/pet/1'
-            )
-          )
-        );
-        assert.ok(
-          !_.isArray(
-            pathObject.regexp.exec(
-              swaggerApi.definitionFullyResolved.basePath + '/pets/1'
-            )
-          )
-        );
-        assert.ok(
-          !_.isArray(
-            pathObject.regexp.exec(
-              swaggerApi.definitionFullyResolved.basePath + '/Pet/1'
-            )
-          )
-        );
-      });
-
-      describe('#getOperation', function () {
-        it('should return the expected operation', function () {
-          // By method
-          tHelpers.checkType(
-            swaggerApi.getPath('/pet/{petId}').getOperation('get'),
-            'Operation'
-          );
-          // By operationId
-          tHelpers.checkType(
-            swaggerApi.getPath('/pet').getOperation('addPet'),
-            'Operation'
-          );
+            // Make sure they match the expected URLs
+            assert.ok(
+                _.isArray(
+                    pathObject.regexp.exec(
+                        `${swaggerApi.definitionFullyResolved.basePath}/pet/1`,
+                    ),
+                ),
+            );
+            assert.ok(
+                !_.isArray(
+                    pathObject.regexp.exec(
+                        `${swaggerApi.definitionFullyResolved.basePath}/pets/1`,
+                    ),
+                ),
+            );
+            assert.ok(
+                !_.isArray(
+                    pathObject.regexp.exec(
+                        `${swaggerApi.definitionFullyResolved.basePath}/Pet/1`,
+                    ),
+                ),
+            );
         });
 
-        it('should return no operation for the missing method', function () {
-          assert.ok(
-            _.isUndefined(
-              swaggerApi.getPath('/pet/{petId}').getOperation('head')
-            )
-          );
-        });
-      });
+        describe("#getOperation", () => {
+            it("should return the expected operation", () => {
+                // By method
+                tHelpers.checkType(
+                    swaggerApi.getPath("/pet/{petId}").getOperation("get"),
+                    "Operation",
+                );
+                // By operationId
+                tHelpers.checkType(
+                    swaggerApi.getPath("/pet").getOperation("addPet"),
+                    "Operation",
+                );
+            });
 
-      describe('#getOperations', function () {
-        it('should return the expected operations', function () {
-          assert.equal(
-            swaggerApi.getPath('/pet/{petId}').getOperations().length,
-            3
-          );
-        });
-
-        it('should return no operations', function (done) {
-          var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
-          var path = '/petz';
-
-          cSwagger.paths[path] = {};
-
-          Sway.create({
-            definition: cSwagger,
-          })
-            .then(function (api) {
-              assert.equal(api.getPath(path).getOperations().length, 0);
-            })
-            .then(done, done);
-        });
-      });
-
-      describe('#getOperationsByTag', function () {
-        it('should return the expected operations', function () {
-          assert.equal(
-            swaggerApi.getPath('/pet/{petId}').getOperationsByTag('pet').length,
-            3
-          );
+            it("should return no operation for the missing method", () => {
+                assert.ok(
+                    _.isUndefined(
+                        swaggerApi.getPath("/pet/{petId}").getOperation("head"),
+                    ),
+                );
+            });
         });
 
-        it('should return no operations', function () {
-          assert.equal(
-            swaggerApi.getPath('/pet/{petId}').getOperationsByTag('petz')
-              .length,
-            0
-          );
-        });
-      });
+        describe("#getOperations", () => {
+            it("should return the expected operations", () => {
+                assert.equal(
+                    swaggerApi.getPath("/pet/{petId}").getOperations().length,
+                    3,
+                );
+            });
 
-      describe('#getParameters', function () {
-        it('should return the expected parameters', function () {
-          var parameters = swaggerApi.getPath('/pet/{petId}').getParameters();
+            it("should return no operations", (done) => {
+                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                var path = "/petz";
 
-          assert.equal(parameters.length, 1);
+                cSwagger.paths[path] = {};
+
+                Sway.create({
+                    definition: cSwagger,
+                })
+                    .then((api) => {
+                        assert.equal(
+                            api.getPath(path).getOperations().length,
+                            0,
+                        );
+                    })
+                    .then(done, done);
+            });
         });
 
-        it('should return no parameters', function () {
-          assert.equal(swaggerApi.getPath('/pet').getParameters().length, 0);
+        describe("#getOperationsByTag", () => {
+            it("should return the expected operations", () => {
+                assert.equal(
+                    swaggerApi.getPath("/pet/{petId}").getOperationsByTag("pet")
+                        .length,
+                    3,
+                );
+            });
+
+            it("should return no operations", () => {
+                assert.equal(
+                    swaggerApi
+                        .getPath("/pet/{petId}")
+                        .getOperationsByTag("petz").length,
+                    0,
+                );
+            });
         });
-      });
-    }
-  );
+
+        describe("#getParameters", () => {
+            it("should return the expected parameters", () => {
+                var parameters = swaggerApi
+                    .getPath("/pet/{petId}")
+                    .getParameters();
+
+                assert.equal(parameters.length, 1);
+            });
+
+            it("should return no parameters", () => {
+                assert.equal(
+                    swaggerApi.getPath("/pet").getParameters().length,
+                    0,
+                );
+            });
+        });
+    });
 }
 
-describe('Path', function () {
-  // Swagger document without references
-  runTests('no-refs');
-  // Swagger document with references
-  runTests('with-refs');
+describe("Path", () => {
+    // Swagger document without references
+    runTests("no-refs");
+    // Swagger document with references
+    runTests("with-refs");
 });
