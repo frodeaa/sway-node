@@ -24,118 +24,146 @@
  * THE SOFTWARE.
  */
 
-'use strict';
+var assert = require("node:assert");
+var fs = require("node:fs");
+var helpers = require("../lib/helpers");
+var path = require("node:path");
+var Sway = require("..");
+var YAML = require("js-yaml");
 
-var assert = require('assert');
-var fs = require('fs');
-var helpers = require('../lib/helpers');
-var path = require('path');
-var Sway = require('..');
-var YAML = require('js-yaml');
-
-var documentBase = path.join(__dirname, 'browser', 'documents');
-var relativeBase = typeof window === 'undefined' ? documentBase : 'base/browser/documents';
-var swaggerDoc = YAML.load(fs.readFileSync(path.join(__dirname, './browser/documents/2.0/swagger.yaml'), 'utf8'));
-var swaggerDocCircular = YAML.load(fs.readFileSync(path.join(__dirname,
-                                                                 './browser/documents/2.0/swagger-circular.yaml'),
-                                                       'utf8'));
-var swaggerDocRelativeRefs = YAML.load(fs.readFileSync(path.join(__dirname,
-                                                                     './browser/documents/2.0/swagger-relative-refs.yaml'),
-                                                           'utf8'));
+var documentBase = path.join(__dirname, "browser", "documents");
+var relativeBase =
+    typeof window === "undefined" ? documentBase : "base/browser/documents";
+var swaggerDoc = YAML.load(
+    fs.readFileSync(
+        path.join(__dirname, "./browser/documents/2.0/swagger.yaml"),
+        "utf8",
+    ),
+);
+var swaggerDocCircular = YAML.load(
+    fs.readFileSync(
+        path.join(__dirname, "./browser/documents/2.0/swagger-circular.yaml"),
+        "utf8",
+    ),
+);
+var swaggerDocRelativeRefs = YAML.load(
+    fs.readFileSync(
+        path.join(
+            __dirname,
+            "./browser/documents/2.0/swagger-relative-refs.yaml",
+        ),
+        "utf8",
+    ),
+);
 var swaggerDocValidator = helpers.getJSONSchemaValidator();
 var swaggerApi;
 var swaggerApiCircular;
 var swaggerApiRelativeRefs;
 
-function fail (msg) {
-  assert.fail(msg);
+function fail(msg) {
+    assert.fail(msg);
 }
 
-module.exports.checkType = function (obj, expectedType) {
-  assert.equal(obj.constructor.name, expectedType);
-}
+module.exports.checkType = (obj, expectedType) => {
+    assert.equal(obj.constructor.name, expectedType);
+};
 
 module.exports.documentBase = documentBase;
 
 module.exports.fail = fail;
 
-module.exports.getSwaggerApi = function (callback) {
-  if (swaggerApi) {
-    callback(swaggerApi);
-  } else {
-    Sway.create({
-      definition: swaggerDoc
-    })
-      .then(function (obj) {
-        swaggerApi = obj;
-
+module.exports.getSwaggerApi = (callback) => {
+    if (swaggerApi) {
         callback(swaggerApi);
-      }, function (err) {
-        callback(err);
-      });
-  }
+    } else {
+        Sway.create({
+            definition: swaggerDoc,
+        }).then(
+            (obj) => {
+                swaggerApi = obj;
+
+                callback(swaggerApi);
+            },
+            (err) => {
+                callback(err);
+            },
+        );
+    }
 };
 
-module.exports.getSwaggerApiCircular = function (callback) {
-  if (swaggerApiCircular) {
-    callback(swaggerApiCircular);
-  } else {
-    Sway.create({
-      definition: swaggerDocCircular,
-      jsonRefs: {
-        resolveCirculars: true
-      }
-    })
-      .then(function (obj) {
-        swaggerApiCircular = obj;
-
+module.exports.getSwaggerApiCircular = (callback) => {
+    if (swaggerApiCircular) {
         callback(swaggerApiCircular);
-      }, function (err) {
-        callback(err);
-      });
-  }
+    } else {
+        Sway.create({
+            definition: swaggerDocCircular,
+            jsonRefs: {
+                resolveCirculars: true,
+            },
+        }).then(
+            (obj) => {
+                swaggerApiCircular = obj;
+
+                callback(swaggerApiCircular);
+            },
+            (err) => {
+                callback(err);
+            },
+        );
+    }
 };
 
-module.exports.getSwaggerApiRelativeRefs = function (callback) {
-  if (swaggerApiRelativeRefs) {
-    callback(swaggerApiRelativeRefs);
-  } else {
-    Sway.create({
-      definition: swaggerDocRelativeRefs,
-      jsonRefs: {location: path.join(relativeBase, './2.0/swagger-relative-refs.yaml')}
-    })
-      .then(function (obj) {
-        swaggerApiRelativeRefs = obj;
-
+module.exports.getSwaggerApiRelativeRefs = (callback) => {
+    if (swaggerApiRelativeRefs) {
         callback(swaggerApiRelativeRefs);
-      }, function (err) {
-        callback(err);
-      });
-  }
+    } else {
+        Sway.create({
+            definition: swaggerDocRelativeRefs,
+            jsonRefs: {
+                location: path.join(
+                    relativeBase,
+                    "./2.0/swagger-relative-refs.yaml",
+                ),
+            },
+        }).then(
+            (obj) => {
+                swaggerApiRelativeRefs = obj;
+
+                callback(swaggerApiRelativeRefs);
+            },
+            (err) => {
+                callback(err);
+            },
+        );
+    }
 };
 
-module.exports.getSway = function () {
-  return Sway;
+module.exports.getSway = () => Sway;
+
+module.exports.shouldHadFailed = () => {
+    fail("The code above should had thrown an error");
 };
 
-module.exports.shouldHadFailed = function () {
-  fail('The code above should had thrown an error');
-};
+module.exports.shouldNotHadFailed = (err) => {
+    console.error(err.stack);
 
-module.exports.shouldNotHadFailed = function (err) {
-  console.error(err.stack);
-
-  fail('The code above should not had thrown an error');
+    fail("The code above should not had thrown an error");
 };
 
 module.exports.swaggerDoc = swaggerDoc;
 
-module.exports.swaggerDocPath = path.join(relativeBase, './2.0/swagger.yaml');
+module.exports.swaggerDocPath = path.join(relativeBase, "./2.0/swagger.yaml");
 
 module.exports.swaggerDocCircular = swaggerDocCircular;
 
-module.exports.swaggerDocCircularPath = path.join(relativeBase, './2.0/swagger-circular.yaml');
+module.exports.swaggerDocCircularPath = path.join(
+    relativeBase,
+    "./2.0/swagger-circular.yaml",
+);
 
-module.exports.swaggerDocRelativeRefsPath = path.join(relativeBase, './2.0/swagger-relative-refs.yaml');
+module.exports.swaggerDocRelativeRefsPath = path.join(
+    relativeBase,
+    "./2.0/swagger-relative-refs.yaml",
+);
 
 module.exports.swaggerDocValidator = swaggerDocValidator;
