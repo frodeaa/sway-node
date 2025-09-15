@@ -1,7 +1,7 @@
 {
     "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
     "files": {
-        "includes": ["**", "!**/index.d.ts", "!**/node_modules/**"]
+        "includes": ["**", "!**/index.d.ts", "!**/node_modules"]
     },
     "linter": {
         "enabled": true,
