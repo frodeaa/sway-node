@@ -39,7 +39,7 @@
         "@biomejs/biome": "^2.1.4",
         "@semantic-release/git": "10.0.1",
         "@semantic-release/github": "11.0.6",
-        "semantic-release": "24.2.8"
+        "semantic-release": "24.2.9"
     },
     "dependencies": {
         "js-yaml": "^4.1.0",
