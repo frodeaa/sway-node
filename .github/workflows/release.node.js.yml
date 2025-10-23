@@ -5,37 +5,33 @@ on:
     branches:
       - master
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: yarn
-      - run: yarn build
-      - run: yarn lint
-      - run: yarn test
+permissions:
+  contents: read
 
-  semantic-release:
-    needs: build
+jobs:
+  release:
+    name: Release
     runs-on: ubuntu-latest
+
     permissions:
+      id-token: write
       contents: write
       issues: write
       packages: write
       pull-requests: write
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
-      - run: yarn
-      - run: yarn build
-      - run: yarn lint
-      - run: yarn test
+          node-version: "lts/*"
+          cache: yarn
+
+      - run: |
+          yarn install --immutable
+          yarn run test
+          yarn run build
+          yarn run lint
       - env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: yarn semantic-release

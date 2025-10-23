@@ -4,22 +4,20 @@ on:
   pull_request:
     branches: [ "master" ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [22.x]
     steps:
     - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+    - uses: actions/setup-node@v6
       with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: yarn
-    - run: yarn build
-    - run: yarn lint
-    - run: yarn test
+        node-version: "lts/*"
+        cache: yarn
+    - run: |
+        yarn install --immutable
+        yarn build
+        yarn lint
+        yarn test
