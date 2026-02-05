@@ -47,7 +47,7 @@
         "lodash": "^4.17.10",
         "path-to-regexp": "^6.3.0",
         "swagger-schema-official": "2.0.0-bab6bed",
-        "z-schema": "^6.0.1"
+        "z-schema": "^7.2.0"
     },
     "resolutions": {
         "superagent": "^10.2.3",
