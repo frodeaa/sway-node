@@ -25,7 +25,7 @@
 var helpers = require("./lib/helpers");
 var { $RefParser } = require("@apidevtools/json-schema-ref-parser");
 var SwaggerApi = require("./lib/types/api");
-var { collectAndSanitizeRefs } = require("./lib/json-ref-utils");
+var { collectAndSanitizeRefs, pathToPtr } = require("./lib/json-ref-utils");
 
 /**
  * A library for simpler [Swagger](http://swagger.io/) integrations.
@@ -187,6 +187,24 @@ module.exports.create = (options) => {
             helpers.removeCirculars(results.definition);
             helpers.removeCirculars(results.definitionRemotesResolved);
             helpers.removeCirculars(results.definitionFullyResolved);
+
+            const rejectedPatterns = helpers.findRejectedPatterns(
+                results.definition,
+            );
+
+            if (rejectedPatterns.length > 0) {
+                const patternError = new Error(
+                    "Definition contains patterns the JSON Schema validator rejects: " +
+                        rejectedPatterns
+                            .map((rejected) => pathToPtr(rejected.path))
+                            .join(", "),
+                );
+
+                patternError.code = "INVALID_PATTERN";
+                patternError.errors = rejectedPatterns;
+
+                throw patternError;
+            }
 
             // Create object model
             return new SwaggerApi(

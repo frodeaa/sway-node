@@ -25,7 +25,8 @@
  */
 
 const { before, describe, it } = require("node:test");
-var { cloneDeep, isPlainObject } = require("../lib/helpers");
+var libHelpers = require("../lib/helpers");
+var { cloneDeep, isPlainObject } = libHelpers;
 var assert = require("node:assert");
 var helpers = require("./helpers");
 var Sway = helpers.getSway();
@@ -616,6 +617,81 @@ describe("issues", () => {
 
             assert.ok(api);
             assert.equal(api.getPath("self").getOperations().length, 0);
+        });
+    });
+
+    describe("should validate values with JSON Schema draft-04 semantics", () => {
+        var validator = libHelpers.getJSONSchemaValidator();
+
+        function errorCodes(schema, value) {
+            return libHelpers
+                .validateAgainstSchema(validator, schema, value)
+                .errors.map((error) => error.code);
+        }
+
+        it("should support boolean exclusiveMinimum", () => {
+            var schema = { type: "number", minimum: 5, exclusiveMinimum: true };
+
+            assert.deepEqual(errorCodes(schema, 10), []);
+            assert.deepEqual(errorCodes(schema, 5), ["MINIMUM_EXCLUSIVE"]);
+        });
+
+        it("should support boolean exclusiveMaximum", () => {
+            var schema = { type: "number", maximum: 5, exclusiveMaximum: true };
+
+            assert.deepEqual(errorCodes(schema, 1), []);
+            assert.deepEqual(errorCodes(schema, 5), ["MAXIMUM_EXCLUSIVE"]);
+        });
+
+        it("should support tuple items with additionalItems", () => {
+            var schema = {
+                type: "array",
+                items: [{ type: "string" }],
+                additionalItems: false,
+            };
+
+            assert.deepEqual(errorCodes(schema, ["a"]), []);
+            assert.deepEqual(errorCodes(schema, ["a", 1]), [
+                "ARRAY_ADDITIONAL_ITEMS",
+            ]);
+        });
+
+        it("should rethrow errors thrown by a format validator", () => {
+            libHelpers.registerFormat("throws", () => {
+                throw new Error("format validator failed");
+            });
+
+            try {
+                assert.throws(
+                    () => errorCodes({ type: "string", format: "throws" }, "x"),
+                    { message: "format validator failed" },
+                );
+            } finally {
+                libHelpers.unregisterFormat("throws");
+            }
+        });
+
+        it("should use schema changes made after a previous validation", () => {
+            var schema = { type: "string", minLength: 1 };
+
+            assert.deepEqual(errorCodes(schema, "ab"), []);
+
+            schema.minLength = 5;
+
+            assert.deepEqual(errorCodes(schema, "ab"), ["MIN_LENGTH"]);
+        });
+
+        it("should not modify the provided schema", () => {
+            var schema = {
+                definitions: { Name: { type: "string" } },
+                type: "object",
+                properties: { default: { $ref: "#/definitions/Name" } },
+            };
+            var original = cloneDeep(schema);
+
+            errorCodes(schema, { default: 1 });
+
+            assert.deepEqual(schema, original);
         });
     });
 });
