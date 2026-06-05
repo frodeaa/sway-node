@@ -518,15 +518,15 @@ function runTests(mode) {
                             errors: [
                                 {
                                     code: "OBJECT_MISSING_REQUIRED_PROPERTY",
-                                    message:
-                                        "Missing required property: photoUrls",
-                                    params: ["photoUrls"],
+                                    message: "Missing required property: name",
+                                    params: ["name"],
                                     path: [],
                                 },
                                 {
                                     code: "OBJECT_MISSING_REQUIRED_PROPERTY",
-                                    message: "Missing required property: name",
-                                    params: ["name"],
+                                    message:
+                                        "Missing required property: photoUrls",
+                                    params: ["photoUrls"],
                                     path: [],
                                 },
                             ],
