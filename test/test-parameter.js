@@ -101,12 +101,12 @@ function runTests(mode) {
                     assert.deepEqual(err.errors, [
                         {
                             code: "OBJECT_MISSING_REQUIRED_PROPERTY",
-                            message: "Missing required property: photoUrls",
+                            message: "Missing required property: name",
                             path: [],
                         },
                         {
                             code: "OBJECT_MISSING_REQUIRED_PROPERTY",
-                            message: "Missing required property: name",
+                            message: "Missing required property: photoUrls",
                             path: [],
                         },
                     ]);
@@ -2427,14 +2427,14 @@ function runTests(mode) {
                     assert.deepEqual(error.errors, [
                         {
                             code: "OBJECT_MISSING_REQUIRED_PROPERTY",
-                            message: "Missing required property: photoUrls",
-                            params: ["photoUrls"],
+                            message: "Missing required property: name",
+                            params: ["name"],
                             path: [],
                         },
                         {
                             code: "OBJECT_MISSING_REQUIRED_PROPERTY",
-                            message: "Missing required property: name",
-                            params: ["name"],
+                            message: "Missing required property: photoUrls",
+                            params: ["photoUrls"],
                             path: [],
                         },
                     ]);
