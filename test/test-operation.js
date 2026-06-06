@@ -30,27 +30,19 @@ var assert = require("node:assert");
 var helpers = require("./helpers");
 var Sway = helpers.getSway();
 
-function runTests(mode) {
-    var label = mode === "with-refs" ? "with" : "without";
+function runTests() {
     var swaggerApi;
 
     before(async () => {
         await new Promise((done) => {
-            function callback(api) {
+            helpers.getSwaggerApi((api) => {
                 swaggerApi = api;
-
                 done();
-            }
-
-            if (mode === "with-refs") {
-                helpers.getSwaggerApiRelativeRefs(callback);
-            } else {
-                helpers.getSwaggerApi(callback);
-            }
+            });
         });
     });
 
-    describe(`should handle Swagger document ${label} relative references`, () => {
+    describe("should handle Swagger document without relative references", () => {
         it("should handle composite parameters", () => {
             var method = "post";
             var path = "/pet/{petId}";
@@ -1067,8 +1059,5 @@ function runTests(mode) {
 }
 
 describe("Operation", () => {
-    // Swagger document without references
-    runTests("no-refs");
-    // Swagger document with references
-    runTests("with-refs");
+    runTests();
 });

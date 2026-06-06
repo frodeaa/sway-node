@@ -43,6 +43,14 @@ var invalidCreateScenarios = [
         "options.jsonRefs must be an object",
     ],
     [
+        [{ definition: {}, jsonRefs: { location: "foo" } }],
+        "options.jsonRefs only supports the 'resolveCirculars' option: location",
+    ],
+    [
+        [{ definition: {}, jsonRefs: { resolveCirculars: "wrongType" } }],
+        "options.jsonRefs.resolveCirculars must be a boolean",
+    ],
+    [
         [{ definition: {}, customFormats: "wrongType" }],
         "options.customFormats must be an array",
     ],

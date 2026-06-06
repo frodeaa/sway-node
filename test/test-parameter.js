@@ -31,27 +31,19 @@ var helpers = require("../lib/helpers"); // Helpers from Sway
 var tHelpers = require("./helpers"); // Helpers for this suite of tests
 var Sway = tHelpers.getSway();
 
-function runTests(mode) {
-    var label = mode === "with-refs" ? "with" : "without";
+function runTests() {
     var swaggerApi;
 
     before(async () => {
         await new Promise((done) => {
-            function callback(api) {
+            tHelpers.getSwaggerApi((api) => {
                 swaggerApi = api;
-
                 done();
-            }
-
-            if (mode === "with-refs") {
-                tHelpers.getSwaggerApiRelativeRefs(callback);
-            } else {
-                tHelpers.getSwaggerApi(callback);
-            }
+            });
         });
     });
 
-    describe(`should handle Swagger document ${label} relative references`, () => {
+    describe("should handle Swagger document without relative references", () => {
         it("should have proper structure", () => {
             var path = "/pet/{petId}";
             var pathDef = swaggerApi.definitionFullyResolved.paths[path];
@@ -2445,8 +2437,5 @@ function runTests(mode) {
 }
 
 describe("Parameter", () => {
-    // Swagger document without references
-    runTests("no-refs");
-    // Swagger document with references
-    runTests("with-refs");
+    runTests();
 });

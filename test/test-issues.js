@@ -68,51 +68,24 @@ describe("issues", () => {
             .then(done, done);
     });
 
-    it("should support relative references (and to YAML files) (Issue 17)", async () => {
-        await new Promise((done) => {
-            helpers.getSwaggerApiRelativeRefs((swaggerApiRelativeRefs) => {
-                assert.ok(
-                    _.isUndefined(
-                        swaggerApiRelativeRefs.definitionFullyResolved.info
-                            .$ref,
-                    ),
-                );
-                assert.ok(
-                    Object.keys(
-                        swaggerApiRelativeRefs.definitionFullyResolved
-                            .definitions,
-                    ).length > 1,
-                );
-                assert.ok(
-                    Object.keys(
-                        swaggerApiRelativeRefs.definitionFullyResolved.paths,
-                    ).length > 1,
-                );
-                assert.equal(
-                    swaggerApiRelativeRefs.definitionFullyResolved.info.title,
-                    "Swagger Petstore",
-                );
-                assert.ok(
-                    _.isPlainObject(
-                        swaggerApiRelativeRefs.definitionFullyResolved
-                            .definitions.Pet,
-                    ),
-                );
-                assert.ok(
-                    _.isPlainObject(
-                        swaggerApiRelativeRefs.definitionFullyResolved.paths[
-                            "/pet/{petId}"
-                        ].get,
-                    ),
-                );
+    it("file references are not supported and reported as errors (Issue 17)", async () => {
+        var cSwagger = _.cloneDeep(helpers.swaggerDoc);
 
-                _.each(swaggerApiRelativeRefs.references, (entry) => {
-                    assert.ok(typeof entry.missing === "undefined");
-                });
+        cSwagger.paths["/pet"].post.parameters[0].schema.$ref =
+            "models/Pet.json";
 
-                done();
-            });
-        });
+        const api = await Sway.create({ definition: cSwagger });
+        var results = api.validate();
+        var refErrors = results.errors.filter(
+            (e) => e.code === "INVALID_REFERENCE",
+        );
+
+        assert.equal(refErrors.length, 1);
+        assert.ok(
+            refErrors[0].message.startsWith(
+                "Only local JSON pointer references (#/...) are supported:",
+            ),
+        );
     });
 
     it("should not throw an error for unknown formats (Issue 20)", (done) => {
