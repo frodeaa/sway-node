@@ -28,7 +28,7 @@ const { before, beforeEach, describe, it } = require("node:test");
 var _ = require("lodash");
 var assert = require("node:assert");
 var tHelpers = require("./helpers");
-var JsonRefs = require("json-refs");
+var { pathToPtr } = require("../lib/json-ref-utils");
 var supportedHttpMethods = require("../lib/swagger-methods");
 var Sway = tHelpers.getSway();
 
@@ -44,23 +44,15 @@ function getOperationCount(pathDef) {
     return count;
 }
 
-function runTests(mode) {
-    var label = mode === "with-refs" ? "with" : "without";
+function runTests() {
     var swaggerApi;
 
     before(async () => {
         await new Promise((done) => {
-            function callback(api) {
+            tHelpers.getSwaggerApi((api) => {
                 swaggerApi = api;
-
                 done();
-            }
-
-            if (mode === "with-refs") {
-                tHelpers.getSwaggerApiRelativeRefs(callback);
-            } else {
-                tHelpers.getSwaggerApi(callback);
-            }
+            });
         });
     });
 
@@ -72,7 +64,7 @@ function runTests(mode) {
         swaggerApi.unregisterFormat("alwaysFails");
     });
 
-    describe(`should handle Swagger document ${label} relative references`, () => {
+    describe("should handle Swagger document without relative references", () => {
         describe("#getOperations", () => {
             it("should return all operations", () => {
                 var operations = swaggerApi.getOperations();
@@ -1353,8 +1345,8 @@ function runTests(mode) {
                                 _.find(
                                     expected,
                                     (vErr) =>
-                                        JsonRefs.pathToPtr(aErr.path) ===
-                                        JsonRefs.pathToPtr(vErr.path),
+                                        pathToPtr(aErr.path) ===
+                                        pathToPtr(vErr.path),
                                 ),
                             );
                         });
@@ -1737,7 +1729,8 @@ function runTests(mode) {
                                 assert.deepEqual(results.errors, [
                                     {
                                         code: "INVALID_REFERENCE",
-                                        message: "HTTP URIs must have a host.",
+                                        message:
+                                            "Only local JSON pointer references (#/...) are supported: http://:8080",
                                         path: ["paths", "/something", "$ref"],
                                     },
                                 ]);
@@ -2258,11 +2251,11 @@ function runTests(mode) {
 
                                         assert.equal(
                                             error.code,
-                                            "UNRESOLVABLE_REFERENCE",
+                                            "INVALID_REFERENCE",
                                         );
                                         assert.equal(
                                             error.message,
-                                            "Reference could not be resolved: fake.json",
+                                            "Only local JSON pointer references (#/...) are supported: fake.json",
                                         );
                                         assert.deepEqual(error.path, [
                                             "paths",
@@ -2273,7 +2266,6 @@ function runTests(mode) {
                                             "schema",
                                             "$ref",
                                         ]);
-                                        assert.ok(_.has(error, "error"));
                                     })
                                     .then(resolve, reject);
                             });
@@ -2440,7 +2432,7 @@ function runTests(mode) {
                                     {
                                         code: "INVALID_REFERENCE",
                                         message:
-                                            "ptr must start with a / or #/",
+                                            "Only local JSON pointer references (#/...) are supported: #definitions/Pet",
                                         path: [
                                             "paths",
                                             "/pet",
@@ -2667,8 +2659,30 @@ function runTests(mode) {
 }
 
 describe("SwaggerApi", () => {
-    // Swagger document without references
-    runTests("no-refs");
-    // Swagger document with references
-    runTests("with-refs");
+    runTests();
+    // File references are not supported — the Swagger spec must be self-contained.
+    it("should report INVALID_REFERENCE for a file reference", async () => {
+        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+
+        cSwagger.paths["/pet"].post.parameters[0].schema.$ref =
+            "models/Pet.json";
+
+        await new Promise((resolve, reject) => {
+            Sway.create({ definition: cSwagger })
+                .then((api) => {
+                    var results = api.validate();
+                    var refErrors = results.errors.filter(
+                        (e) => e.code === "INVALID_REFERENCE",
+                    );
+
+                    assert.equal(refErrors.length, 1);
+                    assert.ok(
+                        refErrors[0].message.startsWith(
+                            "Only local JSON pointer references (#/...) are supported:",
+                        ),
+                    );
+                })
+                .then(resolve, reject);
+        });
+    });
 });
