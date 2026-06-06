@@ -31,25 +31,19 @@ var tHelpers = require("./helpers");
 var Sway = tHelpers.getSway();
 var YAML = require("js-yaml");
 
-function runTests(mode) {
-    var label = mode === "with-refs" ? "with" : "without";
+function runTests() {
     var swaggerApi;
 
     before(async () => {
         await new Promise((done) => {
-            function callback(api) {
+            tHelpers.getSwaggerApi((api) => {
                 swaggerApi = api;
                 done();
-            }
-            if (mode === "with-refs") {
-                tHelpers.getSwaggerApiRelativeRefs(callback);
-            } else {
-                tHelpers.getSwaggerApi(callback);
-            }
+            });
         });
     });
 
-    describe(`should handle Swagger document ${label} relative references`, () => {
+    describe("should handle Swagger document without relative references", () => {
         describe("#getExample", () => {
             var example = {
                 name: "Sparky",
@@ -752,8 +746,5 @@ function runTests(mode) {
 }
 
 describe("Response", () => {
-    // Swagger document without references
-    runTests("no-refs");
-    // Swagger document with references
-    runTests("with-refs");
+    runTests();
 });

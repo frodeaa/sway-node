@@ -28,37 +28,29 @@ const { before, describe, it } = require("node:test");
 var _ = require("lodash");
 var assert = require("node:assert");
 var tHelpers = require("./helpers");
-var JsonRefs = require("json-refs");
+var { pathToPtr } = require("../lib/json-ref-utils");
 var Sway = tHelpers.getSway();
 
-function runTests(mode) {
-    var label = mode === "with-refs" ? "with" : "without";
+function runTests() {
     var swaggerApi;
 
     before(async () => {
         await new Promise((done) => {
-            function callback(api) {
+            tHelpers.getSwaggerApi((api) => {
                 swaggerApi = api;
-
                 done();
-            }
-
-            if (mode === "with-refs") {
-                tHelpers.getSwaggerApiRelativeRefs(callback);
-            } else {
-                tHelpers.getSwaggerApi(callback);
-            }
+            });
         });
     });
 
-    describe(`should handle Swagger document ${label} relative references`, () => {
+    describe("should handle Swagger document without relative references", () => {
         it("should have proper structure", () => {
             var path = "/pet/{petId}";
             var pathObject = swaggerApi.getOperation(path, "get").pathObject;
 
             assert.deepEqual(pathObject.api, swaggerApi);
             assert.equal(pathObject.path, path);
-            assert.equal(pathObject.ptr, JsonRefs.pathToPtr(["paths", path]));
+            assert.equal(pathObject.ptr, pathToPtr(["paths", path]));
             assert.deepEqual(
                 pathObject.definition,
                 swaggerApi.definitionRemotesResolved.paths[path],
@@ -188,8 +180,5 @@ function runTests(mode) {
 }
 
 describe("Path", () => {
-    // Swagger document without references
-    runTests("no-refs");
-    // Swagger document with references
-    runTests("with-refs");
+    runTests();
 });

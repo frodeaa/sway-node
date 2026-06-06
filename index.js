@@ -24,9 +24,9 @@
 
 var _ = require("lodash");
 var helpers = require("./lib/helpers");
-var JsonRefs = require("json-refs");
+var { $RefParser } = require("@apidevtools/json-schema-ref-parser");
 var SwaggerApi = require("./lib/types/api");
-var YAML = require("js-yaml");
+var { collectAndSanitizeRefs } = require("./lib/json-ref-utils");
 
 /**
  * A library for simpler [Swagger](http://swagger.io/) integrations.
@@ -109,69 +109,43 @@ module.exports.create = (options) => {
 
     //
     allTasks = allTasks
-        // Resolve relative/remote references
-        .then(() => {
-            // Prepare the json-refs options
-            if (_.isUndefined(cOptions.jsonRefs)) {
-                cOptions.jsonRefs = {};
-            }
+        // Resolve references using json-schema-ref-parser
+        .then(async () => {
+            var definition = cOptions.definition;
+            var rawDoc;
+            var parser;
 
-            // Include invalid reference information
-            cOptions.jsonRefs.includeInvalid = true;
-
-            // Resolve only relative/remote references
-            cOptions.jsonRefs.filter = ["relative", "remote"];
-
-            // Update the json-refs options to process YAML
-            if (_.isUndefined(cOptions.jsonRefs.loaderOptions)) {
-                cOptions.jsonRefs.loaderOptions = {};
-            }
-
-            if (_.isUndefined(cOptions.jsonRefs.loaderOptions.processContent)) {
-                cOptions.jsonRefs.loaderOptions.processContent = (res, cb) => {
-                    cb(undefined, YAML.load(res.text));
-                };
-            }
-
-            // Call the appropriate json-refs API
-            if (_.isString(cOptions.definition)) {
-                return JsonRefs.resolveRefsAt(
-                    cOptions.definition,
-                    cOptions.jsonRefs,
-                );
+            if (_.isString(definition)) {
+                parser = new $RefParser();
+                rawDoc = await parser.parse(definition);
             } else {
-                return JsonRefs.resolveRefs(
-                    cOptions.definition,
-                    cOptions.jsonRefs,
-                );
+                rawDoc = definition;
             }
-        })
-        // Resolve local references and merge results
-        .then((remoteResults) => {
-            // Resolve local references (Remote references should had already been resolved)
-            cOptions.jsonRefs.filter = "local";
 
-            return JsonRefs.resolveRefs(
-                remoteResults.resolved || cOptions.definition,
-                cOptions.jsonRefs,
-            ).then((results) => {
-                _.each(remoteResults.refs, (refDetails, refPtr) => {
-                    results.refs[refPtr] = refDetails;
-                });
+            // Clone rawDoc, then collect ref metadata and sanitize in a single pass.
+            // Invalid/missing refs are replaced with {} before the parser sees them.
+            var sanitizedDoc = _.cloneDeep(rawDoc);
+            var refs = collectAndSanitizeRefs(sanitizedDoc);
 
-                return {
-                    // The original Swagger definition
-                    definition: _.isString(cOptions.definition)
-                        ? remoteResults.value
-                        : cOptions.definition,
-                    // The original Swagger definition with its remote references resolved
-                    definitionRemotesResolved: remoteResults.resolved,
-                    // The original Swagger definition with all its references resolved
-                    definitionFullyResolved: results.resolved,
-                    // Merge the local reference details with the remote reference details
-                    refs: results.refs,
-                };
-            });
+            // Dereference all local references; external resolution is disabled as a
+            // safety net — only local #/... refs should remain after sanitization
+            var definitionFullyResolved = await $RefParser.dereference(
+                sanitizedDoc,
+                {
+                    dereference: { circular: true },
+                    resolve: { external: false },
+                },
+            );
+
+            return {
+                // The original Swagger definition (not dereferenced)
+                definition: rawDoc,
+                // No external refs to resolve — same as the original definition
+                definitionRemotesResolved: rawDoc,
+                // The Swagger definition with all local refs fully resolved
+                definitionFullyResolved: definitionFullyResolved,
+                refs: refs,
+            };
         })
         // Process the Swagger document and return the API
         .then((results) => {
