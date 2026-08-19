@@ -25,7 +25,6 @@
  */
 
 const { describe, it } = require("node:test");
-var _ = require("lodash");
 var assert = require("node:assert");
 var helpers = require("./helpers");
 var Sway = helpers.getSway();
@@ -81,17 +80,17 @@ describe("sway", () => {
                 assert.equal(theApi.version, "2.0");
 
                 // Make sure all references were found
-                _.forEach(theApi.references, (details) => {
-                    assert.ok(!_.has(details, "missing"));
+                Object.values(theApi.references).forEach((details) => {
+                    assert.ok(!Object.hasOwn(details, "missing"));
                 });
 
                 // Validate the merging of the Swagger definition properties and the SwaggerApi properties
-                _.forEach(helpers.swaggerDoc, (val, key) => {
-                    assert.deepEqual(theApi[key], val);
+                Object.keys(helpers.swaggerDoc).forEach((key) => {
+                    assert.deepEqual(theApi[key], helpers.swaggerDoc[key]);
                 });
 
                 // Validate the operations (Simple tests for now, deeper testing is below)
-                assert.ok(_.isArray(theApi.pathObjects));
+                assert.ok(Array.isArray(theApi.pathObjects));
                 assert.ok(theApi.pathObjects.length > 0);
 
                 // Validate the registration of customValidator on SwaggerApi
@@ -121,7 +120,7 @@ describe("sway", () => {
         it("should return proper error", (done) => {
             var allTests = Promise.resolve();
 
-            _.each(invalidCreateScenarios, (scenario, index) => {
+            invalidCreateScenarios.forEach((scenario, index) => {
                 allTests = allTests.then(
                     () =>
                         new Promise((resolve, reject) => {

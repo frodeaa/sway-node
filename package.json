@@ -44,7 +44,6 @@
     "dependencies": {
         "js-yaml": "^5.2.1",
         "@apidevtools/json-schema-ref-parser": "^15.3.5",
-        "lodash": "^4.17.10",
         "path-to-regexp": "^8.4.2",
         "swagger-schema-official": "2.0.0-bab6bed",
         "z-schema": "^6.0.1"

@@ -25,7 +25,7 @@
  */
 
 const { before, describe, it } = require("node:test");
-var _ = require("lodash");
+var { cloneDeep } = require("../lib/helpers");
 var assert = require("node:assert");
 var tHelpers = require("./helpers");
 var Sway = tHelpers.getSway();
@@ -58,7 +58,7 @@ function runTests() {
             var operation;
 
             before(async () => {
-                var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                var cSwaggerDoc = cloneDeep(tHelpers.swaggerDoc);
                 var examples = {
                     "application/json": example,
                     "application/x-yaml": example,
@@ -129,7 +129,7 @@ function runTests() {
                     var cSway;
 
                     before(async () => {
-                        var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwaggerDoc = cloneDeep(tHelpers.swaggerDoc);
 
                         // Schemas are added so they don't get recognized as void responses
                         cSwaggerDoc.paths["/pet/{petId}"].delete.responses[
@@ -298,7 +298,7 @@ function runTests() {
                     });
 
                     it("should not return an INVALID_CONENT_TYPE error for empty body (Issue 164)", (done) => {
-                        var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwaggerDoc = cloneDeep(tHelpers.swaggerDoc);
 
                         cSwaggerDoc.paths["/user"].post.produces = [
                             "application/xml",
@@ -347,7 +347,7 @@ function runTests() {
                 // We only need one test to make sure that we're using the global produces
 
                 it("should handle global level produces", (done) => {
-                    var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwaggerDoc = cloneDeep(tHelpers.swaggerDoc);
 
                     cSwaggerDoc.produces = [
                         "application/json",
@@ -385,7 +385,7 @@ function runTests() {
                 });
 
                 it("should handle mime-type parameters (exact match)", (done) => {
-                    var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwaggerDoc = cloneDeep(tHelpers.swaggerDoc);
                     var mimeType = "application/x-yaml; charset=utf-8";
 
                     cSwaggerDoc.paths["/pet/{petId}"].get.produces.push(
@@ -415,7 +415,7 @@ function runTests() {
 
             describe("validate headers", () => {
                 it("should return errors for invalid headers (schema)", (done) => {
-                    var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwaggerDoc = cloneDeep(tHelpers.swaggerDoc);
 
                     cSwaggerDoc.paths["/user/login"].get.responses[
                         "200"
@@ -687,7 +687,7 @@ function runTests() {
                     });
 
                     it("Buffer body", (done) => {
-                        var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwaggerDoc = cloneDeep(tHelpers.swaggerDoc);
 
                         cSwaggerDoc.paths["/user/login"].get.responses[
                             "200"

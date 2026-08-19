@@ -25,7 +25,6 @@
  */
 
 const { before, describe, it } = require("node:test");
-var _ = require("lodash");
 var assert = require("node:assert");
 var helpers = require("../lib/helpers"); // Helpers from Sway
 var tHelpers = require("./helpers"); // Helpers for this suite of tests
@@ -48,9 +47,10 @@ function runTests() {
             var path = "/pet/{petId}";
             var pathDef = swaggerApi.definitionFullyResolved.paths[path];
 
-            _.each(
-                swaggerApi.getOperation(path, "post").getParameters(),
-                (parameter, index) => {
+            swaggerApi
+                .getOperation(path, "post")
+                .getParameters()
+                .forEach((parameter, index) => {
                     var ptr = "#/paths/~1pet~1{petId}/";
                     var def;
 
@@ -64,8 +64,7 @@ function runTests() {
 
                     assert.equal(parameter.ptr, ptr);
                     assert.deepEqual(parameter.definition, def);
-                },
-            );
+                });
         });
 
         describe("#getSchema", () => {
@@ -179,7 +178,7 @@ function runTests() {
                     .getOperation("/pet", "post")
                     .getParameter("body");
 
-                _.forEach(scenarios, (scenario) => {
+                scenarios.forEach((scenario) => {
                     try {
                         param.getValue.apply(param, scenario[0]);
 
@@ -201,7 +200,7 @@ function runTests() {
                     });
 
                     it("missing value", () => {
-                        assert.ok(_.isUndefined(parameter.getValue({}).raw));
+                        assert.ok(parameter.getValue({}).raw === undefined);
                     });
 
                     it("provided value", () => {
@@ -242,11 +241,9 @@ function runTests() {
 
                     it("missing value", () => {
                         assert.ok(
-                            _.isUndefined(
-                                parameter.getValue({
-                                    files: {},
-                                }).raw,
-                            ),
+                            parameter.getValue({
+                                files: {},
+                            }).raw === undefined,
                         );
                     });
 
@@ -304,11 +301,9 @@ function runTests() {
 
                     it("missing value", () => {
                         assert.ok(
-                            _.isUndefined(
-                                parameter.getValue({
-                                    body: {},
-                                }).raw,
-                            ),
+                            parameter.getValue({
+                                body: {},
+                            }).raw === undefined,
                         );
                     });
 
@@ -367,11 +362,9 @@ function runTests() {
 
                     it("missing value", () => {
                         assert.ok(
-                            _.isUndefined(
-                                parameter.getValue({
-                                    headers: {},
-                                }).raw,
-                            ),
+                            parameter.getValue({
+                                headers: {},
+                            }).raw === undefined,
                         );
                     });
 
@@ -446,11 +439,9 @@ function runTests() {
 
                     it("missing value", () => {
                         assert.ok(
-                            _.isUndefined(
-                                parameter.getValue({
-                                    url: "/v2/pet",
-                                }).raw,
-                            ),
+                            parameter.getValue({
+                                url: "/v2/pet",
+                            }).raw === undefined,
                         );
                     });
 
@@ -473,7 +464,7 @@ function runTests() {
                     });
 
                     it("provided value (multiple)", (done) => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = helpers.cloneDeep(tHelpers.swaggerDoc);
 
                         cSwagger.paths["/pet/{petId}/family/{memberId}"] = {
                             parameters: [
@@ -506,14 +497,12 @@ function runTests() {
                             definition: cSwagger,
                         })
                             .then((api) => {
-                                _.each(
-                                    api
-                                        .getOperation(
-                                            "/pet/{petId}/family/{memberId}",
-                                            "get",
-                                        )
-                                        .getParameters(),
-                                    (param) => {
+                                api.getOperation(
+                                    "/pet/{petId}/family/{memberId}",
+                                    "get",
+                                )
+                                    .getParameters()
+                                    .forEach((param) => {
                                         var expected;
 
                                         switch (param.name) {
@@ -535,8 +524,7 @@ function runTests() {
                                             }).raw,
                                             expected,
                                         );
-                                    },
-                                );
+                                    });
                             })
                             .then(done, done);
                     });
@@ -584,11 +572,9 @@ function runTests() {
 
                     it("missing value", () => {
                         assert.ok(
-                            _.isUndefined(
-                                parameter.getValue({
-                                    query: {},
-                                }).raw,
-                            ),
+                            parameter.getValue({
+                                query: {},
+                            }).raw === undefined,
                         );
                     });
 
@@ -607,7 +593,7 @@ function runTests() {
                 });
 
                 it("invalid 'in' value", (done) => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = helpers.cloneDeep(tHelpers.swaggerDoc);
 
                     cSwagger.paths["/pet/{petId}"].parameters[0].in = "invalid";
 
@@ -685,7 +671,9 @@ function runTests() {
 
                     describe("default values", () => {
                         it("provided (array items array)", (done) => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwagger.paths[
                                 "/pet/findByStatus"
@@ -720,7 +708,9 @@ function runTests() {
                         });
 
                         it("provided (array items object)", (done) => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             Sway.create({
                                 definition: cSwagger,
@@ -743,7 +733,9 @@ function runTests() {
                         });
 
                         it("provided (non-array)", (done) => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             Sway.create({
                                 definition: cSwagger,
@@ -766,7 +758,9 @@ function runTests() {
                         });
 
                         it("provided (global array default)", (done) => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwagger.paths[
                                 "/pet/findByStatus"
@@ -803,7 +797,9 @@ function runTests() {
                         });
 
                         it("provided (global array default + items default) : should take the items default", (done) => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwagger.paths[
                                 "/pet/findByStatus"
@@ -833,7 +829,9 @@ function runTests() {
                         });
 
                         it("missing (array items array)", (done) => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwagger.paths[
                                 "/pet/findByStatus"
@@ -851,24 +849,24 @@ function runTests() {
                             })
                                 .then((api) => {
                                     assert.ok(
-                                        _.isUndefined(
-                                            api
-                                                .getOperation(
-                                                    "/pet/findByStatus",
-                                                    "get",
-                                                )
-                                                .getParameter("status")
-                                                .getValue({
-                                                    query: {},
-                                                }).value,
-                                        ),
+                                        api
+                                            .getOperation(
+                                                "/pet/findByStatus",
+                                                "get",
+                                            )
+                                            .getParameter("status")
+                                            .getValue({
+                                                query: {},
+                                            }).value === undefined,
                                     );
                                 })
                                 .then(done, done);
                         });
 
                         it("missing (array items object)", (done) => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             delete cSwagger.paths["/pet/findByStatus"].get
                                 .parameters[0].items.default;
@@ -878,41 +876,36 @@ function runTests() {
                             })
                                 .then((api) => {
                                     assert.ok(
-                                        _.isUndefined(
-                                            api
-                                                .getOperation(
-                                                    "/pet/findByStatus",
-                                                    "get",
-                                                )
-                                                .getParameter("status")
-                                                .getValue({
-                                                    query: {},
-                                                }).value,
-                                        ),
+                                        api
+                                            .getOperation(
+                                                "/pet/findByStatus",
+                                                "get",
+                                            )
+                                            .getParameter("status")
+                                            .getValue({
+                                                query: {},
+                                            }).value === undefined,
                                     );
                                 })
                                 .then(done, done);
                         });
 
                         it("missing (non-array)", (done) => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             Sway.create({
                                 definition: cSwagger,
                             })
                                 .then((api) => {
                                     assert.ok(
-                                        _.isUndefined(
-                                            api
-                                                .getOperation(
-                                                    "/pet/{petId}",
-                                                    "get",
-                                                )
-                                                .getParameter("petId")
-                                                .getValue({
-                                                    url: "/v2/pet",
-                                                }).value,
-                                        ),
+                                        api
+                                            .getOperation("/pet/{petId}", "get")
+                                            .getParameter("petId")
+                                            .getValue({
+                                                url: "/v2/pet",
+                                            }).value === undefined,
                                     );
                                 })
                                 .then(done, done);
@@ -920,7 +913,7 @@ function runTests() {
                     });
 
                     it("optional value", (done) => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = helpers.cloneDeep(tHelpers.swaggerDoc);
 
                         cSwagger.paths["/pet/findByStatus"].get.parameters.push(
                             {
@@ -942,9 +935,9 @@ function runTests() {
                                         query: {},
                                     });
 
-                                assert.ok(_.isUndefined(optionalValue.raw));
-                                assert.ok(_.isUndefined(optionalValue.error));
-                                assert.ok(_.isUndefined(optionalValue.value));
+                                assert.ok(optionalValue.raw === undefined);
+                                assert.ok(optionalValue.error === undefined);
+                                assert.ok(optionalValue.value === undefined);
                                 assert.ok(optionalValue.valid);
                             })
                             .then(done, done);
@@ -965,7 +958,9 @@ function runTests() {
                         var singleStrBooleanLikeValue;
 
                         before(async () => {
-                            var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwaggerDoc = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwaggerDoc.paths[
                                 "/pet/findByStatus"
@@ -1026,7 +1021,9 @@ function runTests() {
 
                         describe("array", () => {
                             it("items array", (done) => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = helpers.cloneDeep(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.paths[
                                     "/pet/findByStatus"
@@ -1153,7 +1150,7 @@ function runTests() {
 
                             describe("collectionFormat", () => {
                                 it("default (csv)", (done) => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = helpers.cloneDeep(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -1183,7 +1180,7 @@ function runTests() {
                                 });
 
                                 it("csv", (done) => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = helpers.cloneDeep(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -1216,7 +1213,7 @@ function runTests() {
 
                                 describe("multi", () => {
                                     it("multiple values", (done) => {
-                                        var cSwagger = _.cloneDeep(
+                                        var cSwagger = helpers.cloneDeep(
                                             tHelpers.swaggerDoc,
                                         );
 
@@ -1248,7 +1245,7 @@ function runTests() {
                                     // This test is required to make sure that when the query string parser only sees one item that an
                                     // array is still returned.
                                     it("single value", (done) => {
-                                        var cSwagger = _.cloneDeep(
+                                        var cSwagger = helpers.cloneDeep(
                                             tHelpers.swaggerDoc,
                                         );
 
@@ -1276,7 +1273,7 @@ function runTests() {
                                 });
 
                                 it("pipes", (done) => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = helpers.cloneDeep(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -1308,7 +1305,7 @@ function runTests() {
                                 });
 
                                 it("ssv", (done) => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = helpers.cloneDeep(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -1340,7 +1337,7 @@ function runTests() {
                                 });
 
                                 it("tsv", (done) => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = helpers.cloneDeep(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -1372,7 +1369,7 @@ function runTests() {
                                 });
 
                                 it("invalid", (done) => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = helpers.cloneDeep(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -1398,7 +1395,7 @@ function runTests() {
                                                 });
 
                                             assert.ok(
-                                                _.isUndefined(paramValue.value),
+                                                paramValue.value === undefined,
                                             );
                                             assert.equal(
                                                 paramValue.error.message,
@@ -1414,7 +1411,9 @@ function runTests() {
                             var cParam;
 
                             before(async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = helpers.cloneDeep(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.paths["/pet/available"] = {
                                     parameters: [
@@ -1488,7 +1487,7 @@ function runTests() {
                                     },
                                 });
 
-                                assert.ok(_.isUndefined(paramValue.value));
+                                assert.ok(paramValue.value === undefined);
                                 assert.equal(
                                     paramValue.error.message,
                                     "Expected type boolean but found type string",
@@ -1500,7 +1499,9 @@ function runTests() {
                             var cParam;
 
                             before(async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = helpers.cloneDeep(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.paths["/pet/{petId}/friends"] = {
                                     parameters: [
@@ -1560,7 +1561,9 @@ function runTests() {
                             });
 
                             it("invalid request value", (done) => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = helpers.cloneDeep(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.paths["/pet/{petId}/friends"] = {
                                     parameters: [
@@ -1598,7 +1601,7 @@ function runTests() {
                                             });
 
                                         assert.ok(
-                                            _.isUndefined(paramValue.value),
+                                            paramValue.value === undefined,
                                         );
                                         assert.equal(
                                             paramValue.error.message,
@@ -1710,7 +1713,9 @@ function runTests() {
                             var cParam;
 
                             before(async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = helpers.cloneDeep(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.paths["/pet/{petId}/friends"] = {
                                     parameters: [
@@ -1769,7 +1774,9 @@ function runTests() {
                                 );
                             });
                             it("invalid request value", (done) => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = helpers.cloneDeep(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.paths["/pet/{petId}/friends"] = {
                                     parameters: [
@@ -1807,7 +1814,7 @@ function runTests() {
                                             });
 
                                         assert.ok(
-                                            _.isUndefined(paramValue.value),
+                                            paramValue.value === undefined,
                                         );
                                         assert.equal(
                                             paramValue.error.message,
@@ -1845,7 +1852,7 @@ function runTests() {
                                     },
                                 });
 
-                                assert.ok(_.isUndefined(paramValue.value));
+                                assert.ok(paramValue.value === undefined);
                                 assert.equal(
                                     paramValue.error.message,
                                     "Expected type string but found type number",
@@ -1872,7 +1879,7 @@ function runTests() {
                                 ];
 
                                 before(async () => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = helpers.cloneDeep(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -1915,7 +1922,7 @@ function runTests() {
                                     assert.ok(paramValue.valid);
                                 });
 
-                                _.each(validValues, (value, index) => {
+                                validValues.forEach((value, index) => {
                                     it(`string request value ${index}`, () => {
                                         var paramValue = cParam.getValue({
                                             query: {
@@ -1931,7 +1938,7 @@ function runTests() {
                                     });
                                 });
 
-                                _.each(invalidValues, (value, index) => {
+                                invalidValues.forEach((value, index) => {
                                     it(`invalid request value ${index}`, () => {
                                         var paramValue = cParam.getValue({
                                             query: {
@@ -1940,7 +1947,7 @@ function runTests() {
                                         });
 
                                         assert.ok(
-                                            _.isUndefined(paramValue.value),
+                                            paramValue.value === undefined,
                                         );
                                         assert.equal(
                                             paramValue.error.message,
@@ -1980,7 +1987,7 @@ function runTests() {
                                 ];
 
                                 before(async () => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = helpers.cloneDeep(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -2023,7 +2030,7 @@ function runTests() {
                                     assert.ok(paramValue.valid);
                                 });
 
-                                _.each(validValues, (value, index) => {
+                                validValues.forEach((value, index) => {
                                     it(`string request value ${index}`, () => {
                                         var paramValue = cParam.getValue({
                                             query: {
@@ -2039,7 +2046,7 @@ function runTests() {
                                     });
                                 });
 
-                                _.each(invalidValues, (value, index) => {
+                                invalidValues.forEach((value, index) => {
                                     it(`invalid request value ${index}`, () => {
                                         var paramValue = cParam.getValue({
                                             query: {
@@ -2048,7 +2055,7 @@ function runTests() {
                                         });
 
                                         assert.ok(
-                                            _.isUndefined(paramValue.value),
+                                            paramValue.value === undefined,
                                         );
                                         assert.equal(
                                             paramValue.error.message,
@@ -2061,7 +2068,9 @@ function runTests() {
                         });
 
                         it("invalid type", (done) => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwagger.paths["/pet"].post.parameters[0].schema = {
                                 type: "invalid",
@@ -2084,13 +2093,15 @@ function runTests() {
                                         paramValue.error.message,
                                     );
                                     assert.deepEqual({}, paramValue.raw);
-                                    assert.ok(_.isUndefined(paramValue.value));
+                                    assert.ok(paramValue.value === undefined);
                                 })
                                 .then(done, done);
                         });
 
                         it("missing type", (done) => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwagger.paths["/pet"].post.parameters[0].schema =
                                 {};
@@ -2126,7 +2137,7 @@ function runTests() {
 
                     assert.deepEqual(paramValue.value, ["available"]);
                     assert.ok(paramValue.valid);
-                    assert.ok(_.isUndefined(paramValue.error));
+                    assert.ok(paramValue.error === undefined);
                 });
 
                 it("missing required value (without default)", () => {
@@ -2138,7 +2149,7 @@ function runTests() {
                         });
                     var error = paramValue.error;
 
-                    assert.ok(_.isUndefined(paramValue.value));
+                    assert.ok(paramValue.value === undefined);
                     assert.ok(paramValue.valid === false);
                     assert.equal(
                         error.message,
@@ -2151,7 +2162,9 @@ function runTests() {
                 describe("provided empty value", () => {
                     describe("integer", () => {
                         it("allowEmptyValue false", (done) => {
-                            var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwaggerDoc = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwaggerDoc.paths[
                                 "/pet/findByStatus"
@@ -2191,7 +2204,9 @@ function runTests() {
                         });
 
                         it("allowEmptyValue true", (done) => {
-                            var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwaggerDoc = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwaggerDoc.paths[
                                 "/pet/findByStatus"
@@ -2229,7 +2244,9 @@ function runTests() {
 
                     describe("number", () => {
                         it("allowEmptyValue false", (done) => {
-                            var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwaggerDoc = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwaggerDoc.paths[
                                 "/pet/findByStatus"
@@ -2269,7 +2286,9 @@ function runTests() {
                         });
 
                         it("allowEmptyValue true", (done) => {
-                            var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwaggerDoc = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwaggerDoc.paths[
                                 "/pet/findByStatus"
@@ -2307,7 +2326,9 @@ function runTests() {
 
                     describe("string", () => {
                         it("allowEmptyValue false", (done) => {
-                            var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwaggerDoc = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwaggerDoc.paths[
                                 "/pet/findByStatus"
@@ -2346,7 +2367,9 @@ function runTests() {
                         });
 
                         it("allowEmptyValue true", (done) => {
-                            var cSwaggerDoc = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwaggerDoc = helpers.cloneDeep(
+                                tHelpers.swaggerDoc,
+                            );
 
                             cSwaggerDoc.paths[
                                 "/pet/findByStatus"
@@ -2395,7 +2418,7 @@ function runTests() {
                         });
 
                     assert.deepEqual(paramValue.value, pet);
-                    assert.ok(_.isUndefined(paramValue.error));
+                    assert.ok(paramValue.error === undefined);
                     assert.ok(paramValue.valid);
                 });
 

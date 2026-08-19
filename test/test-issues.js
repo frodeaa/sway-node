@@ -25,7 +25,7 @@
  */
 
 const { before, describe, it } = require("node:test");
-var _ = require("lodash");
+var { cloneDeep, isPlainObject } = require("../lib/helpers");
 var assert = require("node:assert");
 var helpers = require("./helpers");
 var Sway = helpers.getSway();
@@ -46,7 +46,7 @@ describe("issues", () => {
     });
 
     it("should trap document processing errors (Issue 16)", (done) => {
-        var cSwagger = _.cloneDeep(helpers.swaggerDoc);
+        var cSwagger = cloneDeep(helpers.swaggerDoc);
 
         cSwagger.paths["/pet/{petId}"].get = null;
 
@@ -69,7 +69,7 @@ describe("issues", () => {
     });
 
     it("file references are not supported and reported as errors (Issue 17)", async () => {
-        var cSwagger = _.cloneDeep(helpers.swaggerDoc);
+        var cSwagger = cloneDeep(helpers.swaggerDoc);
 
         cSwagger.paths["/pet"].post.parameters[0].schema.$ref =
             "models/Pet.json";
@@ -89,7 +89,7 @@ describe("issues", () => {
     });
 
     it("should not throw an error for unknown formats (Issue 20)", (done) => {
-        var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+        var cSwaggerDoc = cloneDeep(helpers.swaggerDoc);
 
         cSwaggerDoc.definitions.Pet.properties.name.format = "unknown";
 
@@ -103,7 +103,7 @@ describe("issues", () => {
     });
 
     it("should handle default and id fields (Issue 29)", (done) => {
-        var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+        var cSwaggerDoc = cloneDeep(helpers.swaggerDoc);
 
         cSwaggerDoc.definitions.Pet.properties.default = { type: "string" };
 
@@ -148,12 +148,12 @@ describe("issues", () => {
 
         assert.deepEqual(paramValue.raw, mockFile);
         assert.deepEqual(paramValue.value, mockFile);
-        assert.ok(_.isUndefined(paramValue.error));
+        assert.equal(paramValue.error, undefined);
         assert.ok(paramValue.valid);
     });
 
     it("should handle allOf $ref to a definition with circular reference (Issue 38)", (done) => {
-        var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+        var cSwaggerDoc = cloneDeep(helpers.swaggerDoc);
 
         cSwaggerDoc.definitions.A = {
             allOf: [
@@ -194,7 +194,7 @@ describe("issues", () => {
     });
 
     it("string value for object type (Issue #46)", (done) => {
-        var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+        var cSwaggerDoc = cloneDeep(helpers.swaggerDoc);
 
         cSwaggerDoc.paths["/user/login"].get.responses["200"].schema = {
             properties: {
@@ -248,7 +248,7 @@ describe("issues", () => {
     });
 
     it("Buffer value for object type (Issue #46)", (done) => {
-        var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+        var cSwaggerDoc = cloneDeep(helpers.swaggerDoc);
 
         cSwaggerDoc.paths["/user/login"].get.responses["200"].schema = {
             properties: {
@@ -311,7 +311,7 @@ describe("issues", () => {
     });
 
     it("should handle hierchical query parameters (Issue 39)", (done) => {
-        var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+        var cSwaggerDoc = cloneDeep(helpers.swaggerDoc);
 
         cSwaggerDoc.paths["/pet/findByStatus"].get.parameters.push({
             name: "page[limit]",
@@ -361,8 +361,38 @@ describe("issues", () => {
             .then(done, done);
     });
 
+    it("should resolve a bracketed parameter name that is a literal query key (Issue 39)", async () => {
+        var cSwaggerDoc = cloneDeep(helpers.swaggerDoc);
+
+        cSwaggerDoc.paths["/pet/findByStatus"].get.parameters.push({
+            name: "page[limit]",
+            in: "query",
+            description: "The maximum number of records to return",
+            type: "integer",
+        });
+
+        var api = await Sway.create({
+            definition: cSwaggerDoc,
+        });
+
+        // Some query parsers preserve the parameter name verbatim rather than
+        // nesting it, so the literal key must be tried before bracket-path parsing.
+        var req = {
+            query: {
+                "page[limit]": "100",
+            },
+        };
+        var pageLimitParam = api
+            .getOperation("/pet/findByStatus", "get")
+            .getParameter("page[limit]");
+        var pageLimitParamValue = pageLimitParam.getValue(req);
+
+        assert.equal(pageLimitParamValue.raw, req.query["page[limit]"]);
+        assert.equal(pageLimitParamValue.value, 100);
+    });
+
     it("should not validate optional parameters that are undefined (Issue 60)", (done) => {
-        var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+        var cSwaggerDoc = cloneDeep(helpers.swaggerDoc);
 
         cSwaggerDoc.paths["/pet/findByStatus"].get.parameters.push({
             name: "alive",
@@ -391,7 +421,7 @@ describe("issues", () => {
     });
 
     it("should not throw an error for optional strings that are undefined (Issue 60)", (done) => {
-        var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+        var cSwaggerDoc = cloneDeep(helpers.swaggerDoc);
 
         cSwaggerDoc.paths["/pet/findByStatus"].get.parameters.push({
             name: "nickname",
@@ -472,6 +502,24 @@ describe("issues", () => {
         });
     });
 
+    it("should defer malformed parameters to structural validation instead of throwing during create", async () => {
+        var cSwaggerDoc = cloneDeep(helpers.swaggerDoc);
+
+        // "parameters" must be an array per the Swagger 2.0 schema; construction must
+        // tolerate this shape mismatch so api.validate() can report it structurally
+        // rather than the object model throwing while it is still being built.
+        cSwaggerDoc.paths["/pet/findByStatus"].get.parameters = {
+            malformed: "not an array",
+        };
+
+        var api = await Sway.create({
+            definition: cSwaggerDoc,
+        });
+        var results = api.validate();
+
+        assert.ok(results.errors.length > 0);
+    });
+
     describe("should handle circular documents and inputs", () => {
         var swaggerApiCircular;
 
@@ -493,11 +541,81 @@ describe("issues", () => {
 
             assert.equal(results.warnings.length, 0);
             assert.equal(results.errors.length, 0);
-            assert.ok(_.isPlainObject(circularDef.properties.circular));
+            assert.ok(isPlainObject(circularDef.properties.circular));
             assert.equal(
                 Object.keys(circularDef.properties.circular).length,
                 0,
             );
+        });
+
+        it("helpers#cloneDeep should not stack overflow on a circular object", () => {
+            var obj = { name: "circular" };
+
+            obj.self = obj;
+
+            var cloned = cloneDeep(obj);
+
+            assert.notEqual(cloned, obj);
+            assert.equal(cloned.self, cloned);
+        });
+
+        it("helpers#cloneDeep should preserve shared (non-circular) references", () => {
+            var shared = { x: 1 };
+            var obj = { a: shared, b: shared };
+
+            var cloned = cloneDeep(obj);
+
+            assert.notEqual(cloned.a, shared);
+            assert.equal(cloned.a, cloned.b);
+        });
+
+        it("should not lose prototype methods when a definition has an own '__proto__' property", async () => {
+            var cSwaggerDoc = cloneDeep(helpers.swaggerDoc);
+            var maliciousParam = {
+                name: "poisoned",
+                in: "query",
+                type: "string",
+            };
+
+            Object.defineProperty(maliciousParam, "__proto__", {
+                value: { polluted: true },
+                enumerable: true,
+                configurable: true,
+            });
+
+            cSwaggerDoc.paths["/pet/findByStatus"].get.parameters.push(
+                maliciousParam,
+            );
+
+            var api = await Sway.create({
+                definition: cSwaggerDoc,
+            });
+            var param = api
+                .getOperation("/pet/findByStatus", "get")
+                .getParameter("poisoned");
+
+            assert.equal(typeof param.getValue, "function");
+            assert.equal(
+                param.getValue({ query: { poisoned: "value" } }).raw,
+                "value",
+            );
+        });
+
+        it("should not stack overflow when create() is given a definition object with a real circular reference", async () => {
+            var circularDefinition = {
+                swagger: "2.0",
+                info: { title: "Circular", version: "1.0.0" },
+                paths: {},
+            };
+
+            circularDefinition.paths.self = circularDefinition;
+
+            var api = await Sway.create({
+                definition: circularDefinition,
+            });
+
+            assert.ok(api);
+            assert.equal(api.getPath("self").getOperations().length, 0);
         });
     });
 });
