@@ -25,7 +25,6 @@
  */
 
 const { before, beforeEach, describe, it } = require("node:test");
-var _ = require("lodash");
 var assert = require("node:assert");
 var tHelpers = require("./helpers");
 var { pathToPtr } = require("../lib/json-ref-utils");
@@ -35,7 +34,7 @@ var Sway = tHelpers.getSway();
 function getOperationCount(pathDef) {
     var count = 0;
 
-    _.each(pathDef, (_operation, method) => {
+    Object.keys(pathDef).forEach((method) => {
         if (supportedHttpMethods.indexOf(method) > -1) {
             count += 1;
         }
@@ -71,15 +70,13 @@ function runTests() {
 
                 assert.equal(
                     operations.length,
-                    _.reduce(
+                    Object.values(
                         swaggerApi.definitionFullyResolved.paths,
-                        (count, path) => {
-                            count += getOperationCount(path);
+                    ).reduce((count, path) => {
+                        count += getOperationCount(path);
 
-                            return count;
-                        },
-                        0,
-                    ),
+                        return count;
+                    }, 0),
                 );
 
                 // Validate the operations
@@ -127,17 +124,15 @@ function runTests() {
 
                 it("should return no operation for missing path", () => {
                     assert.ok(
-                        _.isUndefined(
-                            swaggerApi.getOperation("/petz/{petId}", "get"),
-                        ),
+                        swaggerApi.getOperation("/petz/{petId}", "get") ===
+                            undefined,
                     );
                 });
 
                 it("should return no operation for missing method", () => {
                     assert.ok(
-                        _.isUndefined(
-                            swaggerApi.getOperation("/pet/{petId}", "head"),
-                        ),
+                        swaggerApi.getOperation("/pet/{petId}", "head") ===
+                            undefined,
                     );
                 });
             });
@@ -165,23 +160,19 @@ function runTests() {
 
                 it("should return no operation for missing path", () => {
                     assert.ok(
-                        _.isUndefined(
-                            swaggerApi.getOperation({
-                                method: "GET",
-                                url: `${swaggerApi.basePath}/petz/1`,
-                            }),
-                        ),
+                        swaggerApi.getOperation({
+                            method: "GET",
+                            url: `${swaggerApi.basePath}/petz/1`,
+                        }) === undefined,
                     );
                 });
 
                 it("should return no operation for missing method", () => {
                     assert.ok(
-                        _.isUndefined(
-                            swaggerApi.getOperation({
-                                method: "HEAD",
-                                url: `${swaggerApi.basePath}/pet/1`,
-                            }),
-                        ),
+                        swaggerApi.getOperation({
+                            method: "HEAD",
+                            url: `${swaggerApi.basePath}/pet/1`,
+                        }) === undefined,
                     );
                 });
             });
@@ -224,10 +215,10 @@ function runTests() {
                     // This test is likely superfluous but while working on Issue 76 this was broken (pre-commit) and so this test
                     // is here just to be sure.
                     it("match identical", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
                         var matches = ["/foo/{0}/baz", "/foo/{1}/baz"];
 
-                        _.forEach(matches, (newPath) => {
+                        matches.forEach((newPath) => {
                             cSwagger.paths[newPath] = {};
                         });
 
@@ -247,7 +238,7 @@ function runTests() {
                 });
 
                 it("should handle regex characters in path", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
                     var path = "/foo/({bar})";
 
                     cSwagger.paths[path] = {};
@@ -272,7 +263,7 @@ function runTests() {
 
                 it("should return no path object", () => {
                     assert.ok(
-                        _.isUndefined(swaggerApi.getPath("/petz/{petId}")),
+                        swaggerApi.getPath("/petz/{petId}") === undefined,
                     );
                 });
             });
@@ -280,7 +271,7 @@ function runTests() {
             describe("http.ClientRequest (or similar)", () => {
                 describe("multiple matches", () => {
                     it("complete static match", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
                         var lesserMatches = [
                             "/foo/bar/{baz}",
                             "/foo/{bar}/baz",
@@ -288,7 +279,7 @@ function runTests() {
                         ];
                         var match = "/foo/bar/baz";
 
-                        _.forEach(lesserMatches.concat(match), (newPath) => {
+                        lesserMatches.concat(match).forEach((newPath) => {
                             cSwagger.paths[newPath] = {};
                         });
 
@@ -310,11 +301,11 @@ function runTests() {
 
                     // While this scenario should never happen in a valid Swagger document, we handle it anyways
                     it("match multiple levels deep", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
                         var lesserMatches = ["/foo/{bar}/baz/{qux}"];
                         var match = "/foo/{bar}/baz/qux";
 
-                        _.forEach(lesserMatches.concat(match), (newPath) => {
+                        lesserMatches.concat(match).forEach((newPath) => {
                             cSwagger.paths[newPath] = {};
                         });
 
@@ -335,14 +326,14 @@ function runTests() {
                     });
 
                     it("match single level deep", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
                         var lesserMatches = [
                             "/foo/{bar}/baz",
                             "/{foo}/bar/baz",
                         ];
                         var match = "/foo/bar/{baz}";
 
-                        _.forEach(lesserMatches.concat(match), (newPath) => {
+                        lesserMatches.concat(match).forEach((newPath) => {
                             cSwagger.paths[newPath] = {};
                         });
 
@@ -364,10 +355,10 @@ function runTests() {
 
                     // While this scenario should never happen in a valid Swagger document, we handle it anyways
                     it("match identical", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
                         var matches = ["/foo/{0}/baz", "/foo/{1}/baz"];
 
-                        _.forEach(matches, (newPath) => {
+                        matches.forEach((newPath) => {
                             cSwagger.paths[newPath] = {};
                         });
 
@@ -391,7 +382,7 @@ function runTests() {
                 });
 
                 it("should handle regex characters in path", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
                     var path = "/foo/({bar})";
 
                     cSwagger.paths[path] = {};
@@ -423,11 +414,9 @@ function runTests() {
 
                 it("should return no path object", () => {
                     assert.ok(
-                        _.isUndefined(
-                            swaggerApi.getPath({
-                                url: `${swaggerApi.basePath}/petz/1`,
-                            }),
-                        ),
+                        swaggerApi.getPath({
+                            url: `${swaggerApi.basePath}/petz/1`,
+                        }) === undefined,
                     );
                 });
             });
@@ -452,7 +441,7 @@ function runTests() {
                     [["test", true], "validator must be a function"],
                 ];
 
-                _.forEach(scenarios, (scenario) => {
+                scenarios.forEach((scenario) => {
                     try {
                         swaggerApi.registerFormat.apply(
                             swaggerApi,
@@ -467,7 +456,7 @@ function runTests() {
             });
 
             it("should add validator to list of validators", async () => {
-                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                 cSwagger.definitions.Pet.properties.customFormat = {
                     format: "alwaysFails",
@@ -491,7 +480,7 @@ function runTests() {
                                 .getParameter("body")
                                 .getValue(req);
 
-                            assert.ok(_.isUndefined(paramValue.error));
+                            assert.ok(paramValue.error === undefined);
                             assert.deepEqual(req.body, paramValue.raw);
                             assert.deepEqual(req.body, paramValue.value);
 
@@ -543,7 +532,7 @@ function runTests() {
                     [["wrongType"], "validator must be a function"],
                 ];
 
-                _.forEach(scenarios, (scenario) => {
+                scenarios.forEach((scenario) => {
                     try {
                         swaggerApi.registerValidator.apply(
                             swaggerApi,
@@ -591,7 +580,7 @@ function runTests() {
 
             describe("should return errors for an invalid document", () => {
                 it("does not validate against JSON Schema", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     delete cSwagger.paths;
 
@@ -630,7 +619,7 @@ function runTests() {
                                     var results = api.validate();
 
                                     // Validate that all warnings are unused definitions
-                                    _.forEach(results.warnings, (warning) => {
+                                    results.warnings.forEach((warning) => {
                                         assert.equal(
                                             warning.code,
                                             "UNUSED_DEFINITION",
@@ -653,7 +642,9 @@ function runTests() {
                     describe("schema definitions", () => {
                         describe("array", () => {
                             it("no items", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.definitions.Pet = {
                                     type: "array",
@@ -666,7 +657,9 @@ function runTests() {
                             });
 
                             it("items object", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.definitions.Pet = {
                                     type: "array",
@@ -683,7 +676,9 @@ function runTests() {
                             });
 
                             it("items array", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.definitions.Pet = {
                                     type: "array",
@@ -706,7 +701,7 @@ function runTests() {
                         describe("object", () => {
                             describe("additionalProperties", () => {
                                 it("no items", async () => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = structuredClone(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -725,7 +720,7 @@ function runTests() {
                                 });
 
                                 it("items object", async () => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = structuredClone(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -748,7 +743,7 @@ function runTests() {
                                 });
 
                                 it("items array", async () => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = structuredClone(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -776,7 +771,7 @@ function runTests() {
 
                             describe("properties", () => {
                                 it("no items", async () => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = structuredClone(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -798,7 +793,7 @@ function runTests() {
                                 });
 
                                 it("items object", async () => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = structuredClone(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -824,7 +819,7 @@ function runTests() {
                                 });
 
                                 it("items array", async () => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = structuredClone(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -855,7 +850,7 @@ function runTests() {
 
                             describe("allOf", () => {
                                 it("no items", async () => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = structuredClone(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -877,7 +872,7 @@ function runTests() {
                                 });
 
                                 it("items object", async () => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = structuredClone(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -910,7 +905,7 @@ function runTests() {
                                 });
 
                                 it("items array", async () => {
-                                    var cSwagger = _.cloneDeep(
+                                    var cSwagger = structuredClone(
                                         tHelpers.swaggerDoc,
                                     );
 
@@ -948,7 +943,7 @@ function runTests() {
                         });
 
                         it("recursive", async () => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = structuredClone(tHelpers.swaggerDoc);
                             var errorSchema = {
                                 type: "object",
                                 allOf: [
@@ -982,15 +977,12 @@ function runTests() {
                                         var results = api.validate();
 
                                         // Validate that all warnings are unused definitions
-                                        _.forEach(
-                                            results.warnings,
-                                            (warning) => {
-                                                assert.equal(
-                                                    warning.code,
-                                                    "UNUSED_DEFINITION",
-                                                );
-                                            },
-                                        );
+                                        results.warnings.forEach((warning) => {
+                                            assert.equal(
+                                                warning.code,
+                                                "UNUSED_DEFINITION",
+                                            );
+                                        });
 
                                         assert.deepEqual(results.errors, [
                                             {
@@ -1114,7 +1106,9 @@ function runTests() {
                     describe("parameter definitions", () => {
                         describe("global", () => {
                             it("body parameter", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.parameters = {
                                     petInBody: {
@@ -1142,10 +1136,12 @@ function runTests() {
                             });
 
                             it("non-body parameter", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.parameters = {
-                                    petStatus: _.cloneDeep(
+                                    petStatus: structuredClone(
                                         cSwagger.paths["/pet/findByStatus"].get
                                             .parameters[0],
                                     ),
@@ -1162,7 +1158,9 @@ function runTests() {
 
                         describe("path-level", () => {
                             it("body parameter", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.paths["/pet"].parameters = [
                                     {
@@ -1192,10 +1190,12 @@ function runTests() {
                             });
 
                             it("non-body parameter", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.paths["/pet"].parameters = [
-                                    _.cloneDeep(
+                                    structuredClone(
                                         cSwagger.paths["/pet/findByStatus"].get
                                             .parameters[0],
                                     ),
@@ -1215,7 +1215,9 @@ function runTests() {
 
                         describe("operation", () => {
                             it("body parameter", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 delete cSwagger.paths["/user/createWithArray"]
                                     .post.parameters[0].schema.items;
@@ -1231,7 +1233,9 @@ function runTests() {
                             });
 
                             it("non-body parameter", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 delete cSwagger.paths["/pet/findByStatus"].get
                                     .parameters[0].items;
@@ -1250,7 +1254,9 @@ function runTests() {
                     describe("responses", () => {
                         describe("global", () => {
                             it("headers", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.responses = {
                                     success: {
@@ -1273,7 +1279,9 @@ function runTests() {
                             });
 
                             it("schema definition", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.responses = {
                                     success: {
@@ -1295,7 +1303,9 @@ function runTests() {
 
                         describe("operation", () => {
                             it("headers", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 cSwagger.paths[
                                     "/pet/findByStatus"
@@ -1317,7 +1327,9 @@ function runTests() {
                             });
 
                             it("schema definition", async () => {
-                                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                                var cSwagger = structuredClone(
+                                    tHelpers.swaggerDoc,
+                                );
 
                                 delete cSwagger.paths["/pet/findByStatus"].get
                                     .responses["200"].schema.items;
@@ -1339,11 +1351,10 @@ function runTests() {
                     function validateErrors(actual, expected) {
                         assert.equal(actual.length, expected.length);
 
-                        _.each(actual, (aErr) => {
+                        actual.forEach((aErr) => {
                             assert.deepEqual(
                                 aErr,
-                                _.find(
-                                    expected,
+                                expected.find(
                                     (vErr) =>
                                         pathToPtr(aErr.path) ===
                                         pathToPtr(vErr.path),
@@ -1353,7 +1364,7 @@ function runTests() {
                     }
 
                     it("definition (direct)", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         cSwagger.definitions.A = {
                             allOf: [
@@ -1409,7 +1420,7 @@ function runTests() {
                     });
 
                     it("definition (indirect)", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         cSwagger.definitions.A = {
                             allOf: [
@@ -1485,7 +1496,7 @@ function runTests() {
                     });
 
                     it("inline schema", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         cSwagger.definitions.A = {
                             allOf: [
@@ -1530,7 +1541,7 @@ function runTests() {
                     });
 
                     it("not composition/inheritance", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         cSwagger.definitions.Pet.properties.friends = {
                             type: "array",
@@ -1556,7 +1567,7 @@ function runTests() {
 
                 describe("default values fail JSON Schema validation", () => {
                     it("schema-like object (non-body parameter)", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         cSwagger.paths["/pet"].post.parameters.push({
                             in: "query",
@@ -1598,7 +1609,7 @@ function runTests() {
                     });
 
                     it("schema object", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         cSwagger.definitions.Pet.properties.name.default = 123;
 
@@ -1633,8 +1644,8 @@ function runTests() {
 
                 describe("duplicate operation parameter", () => {
                     it("operation-level", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
-                        var cParam = _.cloneDeep(
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
+                        var cParam = structuredClone(
                             cSwagger.paths["/pet/findByStatus"].get
                                 .parameters[0],
                         );
@@ -1674,8 +1685,8 @@ function runTests() {
                     });
 
                     it("path-level", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
-                        var cParam = _.cloneDeep(
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
+                        var cParam = structuredClone(
                             cSwagger.paths["/pet/{petId}"].parameters[0],
                         );
 
@@ -1712,7 +1723,7 @@ function runTests() {
                 });
 
                 it("invalid JSON Reference", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.paths["/something"] = {
                         $ref: "http://:8080",
@@ -1740,7 +1751,7 @@ function runTests() {
                 });
 
                 it("path parameter in pattern is empty", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.paths["/invalid/{}"] = {};
 
@@ -1766,7 +1777,7 @@ function runTests() {
                 });
 
                 it("missing path parameter declaration", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.paths["/pet/{petId}"].get.parameters = [
                         {
@@ -1806,7 +1817,7 @@ function runTests() {
                 });
 
                 it("missing path parameter definition", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.paths["/pet/{petId}"].parameters = [];
 
@@ -1848,7 +1859,7 @@ function runTests() {
                 });
 
                 it("multiple equivalent paths", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.paths["/pet/{notPetId}"] = {};
 
@@ -1874,7 +1885,7 @@ function runTests() {
                 });
 
                 it("multiple operations with the same operationId", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
                     var operationId = cSwagger.paths["/pet"].post.operationId;
 
                     cSwagger.paths["/pet"].put.operationId = operationId;
@@ -1907,8 +1918,8 @@ function runTests() {
                 });
 
                 it("operation has multiple body parameters", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
-                    var dBodyParam = _.cloneDeep(
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
+                    var dBodyParam = structuredClone(
                         cSwagger.paths["/pet"].post.parameters[0],
                     );
 
@@ -1938,7 +1949,7 @@ function runTests() {
                 });
 
                 it("operation can have body or form parameter but not both", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.paths["/pet"].post.parameters.push({
                         name: "name",
@@ -1971,14 +1982,14 @@ function runTests() {
 
                 describe("missing required property definition", () => {
                     it("allOf", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         delete cSwagger.definitions.Pet.properties.name;
 
                         cSwagger.definitions.Pet.allOf = [
                             {
                                 type: "object",
-                                properties: _.cloneDeep(
+                                properties: structuredClone(
                                     cSwagger.definitions.Pet.properties,
                                 ),
                             },
@@ -2008,7 +2019,7 @@ function runTests() {
                     });
 
                     it("properties", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         delete cSwagger.definitions.Pet.properties.name;
 
@@ -2036,7 +2047,7 @@ function runTests() {
 
                 describe("unused definitions", () => {
                     it("definition", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         cSwagger.definitions.Missing = {};
 
@@ -2062,7 +2073,7 @@ function runTests() {
                     });
 
                     it("parameter", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         cSwagger.parameters = {
                             missing: {
@@ -2094,7 +2105,7 @@ function runTests() {
                     });
 
                     it("response", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         cSwagger.responses = {
                             Missing: {
@@ -2124,7 +2135,7 @@ function runTests() {
                     });
 
                     it("securityDefinition", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         cSwagger.securityDefinitions.missing = {
                             type: "apiKey",
@@ -2157,7 +2168,7 @@ function runTests() {
                     });
 
                     it("security scope", async () => {
-                        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                         cSwagger.securityDefinitions.petstore_auth.scopes.missing =
                             "I am missing";
@@ -2192,7 +2203,7 @@ function runTests() {
                 describe("unresolvable references", () => {
                     describe("json reference", () => {
                         it("local", async () => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                             cSwagger.paths[
                                 "/pet"
@@ -2230,7 +2241,7 @@ function runTests() {
                         });
 
                         it("remote", async () => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                             cSwagger.paths[
                                 "/pet"
@@ -2274,7 +2285,7 @@ function runTests() {
 
                     describe("security definition", () => {
                         it("global", async () => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                             cSwagger.security.push({
                                 missing: [],
@@ -2306,7 +2317,7 @@ function runTests() {
                         });
 
                         it("operation-level", async () => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                             cSwagger.paths[
                                 "/store/inventory"
@@ -2345,7 +2356,7 @@ function runTests() {
 
                     describe("security scope definition", () => {
                         it("global", async () => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                             cSwagger.security[0].petstore_auth.push("missing");
 
@@ -2376,7 +2387,7 @@ function runTests() {
                         });
 
                         it("operation-level", async () => {
-                            var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                            var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                             cSwagger.paths[
                                 "/store/inventory"
@@ -2417,7 +2428,7 @@ function runTests() {
             });
 
             it("should return errors for JsonRefs errors", async () => {
-                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                 cSwagger.paths["/pet"].post.parameters[0].schema.$ref =
                     "#definitions/Pet";
@@ -2452,7 +2463,7 @@ function runTests() {
             });
 
             it("should return warnings for JsonRefs warnings", async () => {
-                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                 cSwagger.paths["/pet"].post.parameters[0].schema.extraField =
                     "This is an extra field";
@@ -2500,7 +2511,7 @@ function runTests() {
                 }
 
                 it("should handle parameter definition", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.paths["/pet"].post.parameters[0] = {};
 
@@ -2516,7 +2527,7 @@ function runTests() {
                 });
 
                 it("should handle global parameter definition", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.parameters = {
                         broken: {},
@@ -2534,7 +2545,7 @@ function runTests() {
                 });
 
                 it("should handle response definition", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.paths["/pet"].post.responses.default = {};
 
@@ -2550,7 +2561,7 @@ function runTests() {
                 });
 
                 it("should handle response schema definition", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.paths["/pet"].post.responses.default = {
                         description: "A broken response",
@@ -2569,7 +2580,7 @@ function runTests() {
                 });
 
                 it("should handle schema additionalProperties definition", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.definitions.Broken = {
                         type: "object",
@@ -2591,7 +2602,7 @@ function runTests() {
                 });
 
                 it("should handle schema items definition", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.definitions.Broken = {
                         type: "object",
@@ -2615,7 +2626,7 @@ function runTests() {
                 });
 
                 it("should handle securityDefinitions definition", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.securityDefinitions.broken = {};
 
@@ -2631,7 +2642,7 @@ function runTests() {
                 });
 
                 it("should handle schema items definition", async () => {
-                    var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                    var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
                     cSwagger.definitions.Broken = {
                         type: "object",
@@ -2662,7 +2673,7 @@ describe("SwaggerApi", () => {
     runTests();
     // File references are not supported — the Swagger spec must be self-contained.
     it("should report INVALID_REFERENCE for a file reference", async () => {
-        var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+        var cSwagger = structuredClone(tHelpers.swaggerDoc);
 
         cSwagger.paths["/pet"].post.parameters[0].schema.$ref =
             "models/Pet.json";

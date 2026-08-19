@@ -25,7 +25,7 @@
  */
 
 const { before, describe, it } = require("node:test");
-var _ = require("lodash");
+var { isDeepStrictEqual } = require("node:util");
 var assert = require("node:assert");
 var helpers = require("./helpers");
 var Sway = helpers.getSway();
@@ -55,8 +55,11 @@ function runTests() {
             assert.equal(operation.method, method);
             assert.equal(operation.ptr, `#/paths/~1pet~1{petId}/${method}`);
 
-            _.each(operation.definition, (val, key) => {
-                assert.deepEqual(val, pathDef[method][key]);
+            Object.keys(operation.definition).forEach((key) => {
+                assert.deepEqual(
+                    operation.definition[key],
+                    pathDef[method][key],
+                );
             });
 
             assert.equal(operation.parameterObjects.length, 3);
@@ -77,7 +80,9 @@ function runTests() {
                 "#/paths/~1pet~1{petId}~1uploadImage/post",
             );
 
-            _.each(operation.definition, (val, key) => {
+            Object.keys(operation.definition).forEach((key) => {
+                var val = operation.definition[key];
+
                 if (key === "security") {
                     assert.deepEqual(val, [
                         {
@@ -89,7 +94,9 @@ function runTests() {
                 }
             });
 
-            _.each(operation.definitionFullyResolved, (val, key) => {
+            Object.keys(operation.definitionFullyResolved).forEach((key) => {
+                var val = operation.definitionFullyResolved[key];
+
                 if (key === "security") {
                     assert.deepEqual(val, [
                         {
@@ -148,20 +155,22 @@ function runTests() {
 
             // Make sure they match the expected URLs
             assert.ok(
-                _.isArray(createPet.pathObject.regexp.exec(`${basePath}/pet`)),
+                Array.isArray(
+                    createPet.pathObject.regexp.exec(`${basePath}/pet`),
+                ),
             );
             assert.ok(
-                !_.isArray(
+                !Array.isArray(
                     createPet.pathObject.regexp.exec(`${basePath}/pets`),
                 ),
             );
             assert.ok(
-                _.isArray(
+                Array.isArray(
                     updatePet.pathObject.regexp.exec(`${basePath}/pet/1`),
                 ),
             );
             assert.ok(
-                !_.isArray(
+                !Array.isArray(
                     createPet.pathObject.regexp.exec(`${basePath}/pets/1`),
                 ),
             );
@@ -172,7 +181,7 @@ function runTests() {
         });
 
         it("should create proper regexp (with basePath ending in slash)", (done) => {
-            var cSwagger = _.cloneDeep(helpers.swaggerDoc);
+            var cSwagger = structuredClone(helpers.swaggerDoc);
 
             cSwagger.basePath = "/";
 
@@ -184,7 +193,7 @@ function runTests() {
         });
 
         it("should create proper regexp (without basePath)", (done) => {
-            var cSwagger = _.cloneDeep(helpers.swaggerDoc);
+            var cSwagger = structuredClone(helpers.swaggerDoc);
 
             delete cSwagger.basePath;
 
@@ -197,7 +206,7 @@ function runTests() {
 
         describe("#getParameter", () => {
             it("should return the proper response", (done) => {
-                var cSwagger = _.cloneDeep(helpers.swaggerDoc);
+                var cSwagger = structuredClone(helpers.swaggerDoc);
 
                 cSwagger.paths["/pet/{petId}"].get.parameters = [
                     {
@@ -213,14 +222,14 @@ function runTests() {
                     .then((api) => {
                         var operation = api.getOperation("/pet/{petId}", "get");
 
-                        assert.ok(_.isUndefined(operation.getParameter()));
-                        assert.ok(
-                            _.isUndefined(operation.getParameter("missing")),
+                        assert.equal(operation.getParameter(), undefined);
+                        assert.equal(
+                            operation.getParameter("missing"),
+                            undefined,
                         );
-                        assert.ok(
-                            _.isUndefined(
-                                operation.getParameter("petId", "header"),
-                            ),
+                        assert.equal(
+                            operation.getParameter("petId", "header"),
+                            undefined,
                         );
                         assert.deepEqual(
                             operation.getParameter("petId", "path").definition,
@@ -295,7 +304,7 @@ function runTests() {
                 ];
                 var operation = swaggerApi.getOperation("/pet", "post");
 
-                _.forEach(scenarios, (scenario) => {
+                scenarios.forEach((scenario) => {
                     try {
                         operation.validateRequest.apply(operation, scenario[0]);
 
@@ -351,7 +360,7 @@ function runTests() {
                     });
 
                     it("should return an error for an unsupported value", () => {
-                        var request = _.cloneDeep(baseRequest);
+                        var request = structuredClone(baseRequest);
                         var results;
 
                         request.headers = {
@@ -365,7 +374,7 @@ function runTests() {
                     });
 
                     it("should handle an undefined value (defaults to application/octet-stream)", () => {
-                        var request = _.cloneDeep(baseRequest);
+                        var request = structuredClone(baseRequest);
                         var results;
 
                         request.headers = {};
@@ -385,7 +394,7 @@ function runTests() {
                     });
 
                     it("should not return an error for a supported value", () => {
-                        var request = _.cloneDeep(baseRequest);
+                        var request = structuredClone(baseRequest);
                         var results;
 
                         request.headers = {
@@ -402,7 +411,7 @@ function runTests() {
                 // We only need one test to make sure that we're using the global consumes
 
                 it("should handle global level consumes", (done) => {
-                    var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+                    var cSwaggerDoc = structuredClone(helpers.swaggerDoc);
 
                     cSwaggerDoc.consumes =
                         cSwaggerDoc.paths["/pet"].post.consumes;
@@ -414,7 +423,7 @@ function runTests() {
                     })
                         .then((api) => {
                             var operation = api.getOperation("/pet", "post");
-                            var request = _.cloneDeep(baseRequest);
+                            var request = structuredClone(baseRequest);
                             var results;
 
                             request.headers = {
@@ -438,7 +447,7 @@ function runTests() {
                 });
 
                 it("should handle mime-type parameters (exact match)", (done) => {
-                    var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+                    var cSwaggerDoc = structuredClone(helpers.swaggerDoc);
                     var mimeType = "application/x-yaml; charset=utf-8";
 
                     cSwaggerDoc.paths["/pet"].post.consumes.push(mimeType);
@@ -447,7 +456,7 @@ function runTests() {
                         definition: cSwaggerDoc,
                     })
                         .then((api) => {
-                            var request = _.cloneDeep(baseRequest);
+                            var request = structuredClone(baseRequest);
                             var results;
 
                             request.headers = {
@@ -465,7 +474,7 @@ function runTests() {
                 });
 
                 it("should not return an INVALID_CONENT_TYPE error for empty body (Issue 164)", (done) => {
-                    var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+                    var cSwaggerDoc = structuredClone(helpers.swaggerDoc);
 
                     cSwaggerDoc.paths["/user"].post.parameters[0].required =
                         false;
@@ -659,7 +668,7 @@ function runTests() {
                 ];
                 var operation = swaggerApi.getOperation("/pet/{petId}", "post");
 
-                _.forEach(scenarios, (scenario) => {
+                scenarios.forEach((scenario) => {
                     var results = operation.validateRequest.apply(
                         operation,
                         [invalidRequest].concat(scenario[0]),
@@ -668,7 +677,7 @@ function runTests() {
                     assert.equal(results.warnings.length, 0);
                     assert.equal(results.errors.length, scenario[1].length);
 
-                    _.forEach(scenario[1], (location) => {
+                    scenario[1].forEach((location) => {
                         var codeSuffix = location.toUpperCase();
                         var name = "extra";
 
@@ -688,8 +697,8 @@ function runTests() {
                         }
 
                         assert.ok(
-                            _.findIndex(results.errors, (err) =>
-                                _.isEqual(err, {
+                            results.errors.findIndex((err) =>
+                                isDeepStrictEqual(err, {
                                     code: `REQUEST_ADDITIONAL_${codeSuffix}`,
                                     message:
                                         "Additional " +
@@ -795,7 +804,7 @@ function runTests() {
                     "get",
                 );
 
-                _.forEach(scenarios, (scenario) => {
+                scenarios.forEach((scenario) => {
                     try {
                         operation.validateResponse.apply(
                             operation,
@@ -810,7 +819,7 @@ function runTests() {
             });
 
             it("should not return an INVALID_CONENT_TYPE error for empty body (Issue 164)", (done) => {
-                var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+                var cSwaggerDoc = structuredClone(helpers.swaggerDoc);
 
                 cSwaggerDoc.paths["/user"].post.produces = ["application/xml"];
                 cSwaggerDoc.paths["/user"].post.responses.default.schema = {
@@ -1015,7 +1024,7 @@ function runTests() {
                     ["header"],
                 ],
             ];
-            var cSwagger = _.cloneDeep(helpers.swaggerDoc);
+            var cSwagger = structuredClone(helpers.swaggerDoc);
 
             cSwagger.paths["/pet/{petId}"].post.responses.default = {
                 description: "successful operation",
@@ -1026,7 +1035,7 @@ function runTests() {
 
             Sway.create({ definition: cSwagger })
                 .then((api) => {
-                    _.forEach(scenarios, (scenario) => {
+                    scenarios.forEach((scenario) => {
                         var operation = api.getOperation(
                             "/pet/{petId}",
                             "post",
@@ -1039,10 +1048,10 @@ function runTests() {
                         assert.equal(results.warnings.length, 0);
                         assert.equal(results.errors.length, scenario[1].length);
 
-                        _.forEach(scenario[1], () => {
+                        scenario[1].forEach(() => {
                             assert.ok(
-                                _.findIndex(results.errors, (err) =>
-                                    _.isEqual(err, {
+                                results.errors.findIndex((err) =>
+                                    isDeepStrictEqual(err, {
                                         code: "REQUEST_ADDITIONAL_HEADER",
                                         message:
                                             "Additional header not allowed: content-type",

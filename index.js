@@ -22,7 +22,6 @@
  * THE SOFTWARE.
  */
 
-var _ = require("lodash");
 var helpers = require("./lib/helpers");
 var { $RefParser } = require("@apidevtools/json-schema-ref-parser");
 var SwaggerApi = require("./lib/types/api");
@@ -57,57 +56,57 @@ module.exports.create = (options) => {
     allTasks = allTasks.then(
         () =>
             new Promise((resolve) => {
-                if (_.isUndefined(options)) {
+                if (options === undefined) {
                     throw new TypeError("options is required");
-                } else if (!_.isPlainObject(options)) {
+                } else if (!helpers.isPlainObject(options)) {
                     throw new TypeError("options must be an object");
-                } else if (_.isUndefined(options.definition)) {
+                } else if (options.definition === undefined) {
                     throw new TypeError("options.definition is required");
                 } else if (
-                    !_.isPlainObject(options.definition) &&
-                    !_.isString(options.definition)
+                    !helpers.isPlainObject(options.definition) &&
+                    typeof options.definition !== "string"
                 ) {
                     throw new TypeError(
                         "options.definition must be either an object or a string",
                     );
                 } else if (
-                    !_.isUndefined(options.jsonRefs) &&
-                    !_.isPlainObject(options.jsonRefs)
+                    options.jsonRefs !== undefined &&
+                    !helpers.isPlainObject(options.jsonRefs)
                 ) {
                     throw new TypeError("options.jsonRefs must be an object");
                 } else if (
-                    _.isPlainObject(options.jsonRefs) &&
-                    _.difference(Object.keys(options.jsonRefs), [
-                        "resolveCirculars",
-                    ]).length > 0
+                    helpers.isPlainObject(options.jsonRefs) &&
+                    Object.keys(options.jsonRefs).filter(
+                        (key) => key !== "resolveCirculars",
+                    ).length > 0
                 ) {
                     // External/relative reference resolution was removed along with json-refs, so
                     // options that only ever configured that (location, relativeBase, filter, etc.)
                     // are rejected rather than silently ignored.
                     throw new TypeError(
                         "options.jsonRefs only supports the 'resolveCirculars' option: " +
-                            _.difference(Object.keys(options.jsonRefs), [
-                                "resolveCirculars",
-                            ]).join(", "),
+                            Object.keys(options.jsonRefs)
+                                .filter((key) => key !== "resolveCirculars")
+                                .join(", "),
                     );
                 } else if (
-                    !_.isUndefined(options.jsonRefs) &&
-                    !_.isUndefined(options.jsonRefs.resolveCirculars) &&
-                    !_.isBoolean(options.jsonRefs.resolveCirculars)
+                    options.jsonRefs !== undefined &&
+                    options.jsonRefs.resolveCirculars !== undefined &&
+                    typeof options.jsonRefs.resolveCirculars !== "boolean"
                 ) {
                     throw new TypeError(
                         "options.jsonRefs.resolveCirculars must be a boolean",
                     );
                 } else if (
-                    !_.isUndefined(options.customFormats) &&
-                    !_.isArray(options.customFormats)
+                    options.customFormats !== undefined &&
+                    !Array.isArray(options.customFormats)
                 ) {
                     throw new TypeError(
                         "options.customFormats must be an array",
                     );
                 } else if (
-                    !_.isUndefined(options.customValidators) &&
-                    !_.isArray(options.customValidators)
+                    options.customValidators !== undefined &&
+                    !Array.isArray(options.customValidators)
                 ) {
                     throw new TypeError(
                         "options.customValidators must be an array",
@@ -128,7 +127,7 @@ module.exports.create = (options) => {
     );
 
     // Make a copy of the input options so as not to alter them
-    cOptions = _.cloneDeep(options);
+    cOptions = helpers.cloneDeep(options);
 
     //
     allTasks = allTasks
@@ -138,7 +137,7 @@ module.exports.create = (options) => {
             var rawDoc;
             var parser;
 
-            if (_.isString(definition)) {
+            if (typeof definition === "string") {
                 parser = new $RefParser();
                 rawDoc = await parser.parse(definition);
             } else {
@@ -147,7 +146,7 @@ module.exports.create = (options) => {
 
             // Clone rawDoc, then collect ref metadata and sanitize in a single pass.
             // Invalid/missing refs are replaced with {} before the parser sees them.
-            var sanitizedDoc = _.cloneDeep(rawDoc);
+            var sanitizedDoc = helpers.cloneDeep(rawDoc);
             var refs = collectAndSanitizeRefs(sanitizedDoc);
 
             // Dereference all local references; external resolution is disabled as a
@@ -161,13 +160,10 @@ module.exports.create = (options) => {
                 sanitizedDoc,
                 {
                     dereference: {
-                        circular: _.get(
-                            cOptions,
-                            "jsonRefs.resolveCirculars",
-                            false,
-                        )
-                            ? true
-                            : "ignore",
+                        circular:
+                            (cOptions.jsonRefs?.resolveCirculars ?? false)
+                                ? true
+                                : "ignore",
                     },
                     resolve: { external: false },
                 },
