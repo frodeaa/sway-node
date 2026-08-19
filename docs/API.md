@@ -61,8 +61,9 @@ Options used when creating the `SwaggerApi`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| definition | <code>object</code> &#124; <code>string</code> | The Swagger definition location or structure |
-| jsonRefs | <code>object</code> | *(See [JsonRefs~JsonRefsOptions](https://github.com/whitlockjc/json-refs/blob/master/docs/API.md#module_JsonRefs..JsonRefsOptions))* |
+| definition | <code>object</code> &#124; <code>string</code> | The Swagger definition location or structure. Only local `#/...` JSON References are supported; external/relative references are rejected. |
+| jsonRefs | <code>object</code> | Options for local reference resolution |
+| jsonRefs.resolveCirculars | <code>boolean</code> | <code>false</code> Whether to fully resolve circular `$ref`s. When `false` (the default), circular references are left unresolved rather than dereferenced. |
 | customFormats | <code>object</code> | The key/value pair of custom formats *(The keys are the format name and the values are async functions.  See [ZSchema Custom Formats](https://github.com/zaggino/z-schema#register-a-custom-format))* |
 | customValidators | <code>[Array.&lt;DocumentValidationFunction&gt;](#module_sway.DocumentValidationFunction)</code> | The custom validators |
 
@@ -542,8 +543,8 @@ information to perform response validation.
 | customFormats | <code>object</code> | The key/value pair of custom formats *(The keys are the format name and the values are async functions.  See [ZSchema Custom Formats](https://github.com/zaggino/z-schema#register-a-custom-format))* |
 | customValidators | <code>[Array.&lt;DocumentValidationFunction&gt;](#module_sway.DocumentValidationFunction)</code> | The array of custom validators |
 | definition | <code>object</code> | The original Swagger definition |
-| definitionRemotesResolved | <code>object</code> | The Swagger definition with only its remote references resolved *(This means all references to external/remote documents are replaced with its dereferenced value but all local references are left unresolved.)* |
-| definitionFullyResolved | <code>object</code> | The Swagger definition with all of its resolvable references resolved *(This means that all resolvable references are replaced with their dereferenced value.)* |
+| definitionRemotesResolved | <code>object</code> | The original Swagger definition, unchanged *(External/relative references are not supported and are never resolved, so this is identical to `definition`; it is kept only for backward compatibility with the shape of this constructor.)* |
+| definitionFullyResolved | <code>object</code> | The Swagger definition with local (`#/...`) references resolved *(External/relative/invalid references are left unresolved — replaced with `{}` — rather than dereferenced. Circular local references are also left unresolved by default; set `options.jsonRefs.resolveCirculars` to fully resolve them instead.)* |
 | documentationUrl | <code>string</code> | The URL to the Swagger documentation |
 | pathObjects | <code>[Array.&lt;Path&gt;](#module_sway.Path)</code> | The unique `Path` objects |
 | options | <code>object</code> | The options passed to the constructor |
@@ -577,8 +578,8 @@ object.
 | Param | Type | Description |
 | --- | --- | --- |
 | definition | <code>object</code> | The original Swagger definition |
-| definitionRemotesResolved | <code>object</code> | The Swagger definition with all of its remote references resolved |
-| definitionFullyResolved | <code>object</code> | The Swagger definition with all of its references resolved |
+| definitionRemotesResolved | <code>object</code> | The original Swagger definition, unchanged *(External/relative references are not supported and are never resolved, so this is identical to `definition`; it is kept only for backward compatibility with the shape of this constructor.)* |
+| definitionFullyResolved | <code>object</code> | The Swagger definition with local (`#/...`) references resolved *(External/relative/invalid references are left unresolved — replaced with `{}` — rather than dereferenced. Circular local references are also left unresolved by default; set `options.jsonRefs.resolveCirculars` to fully resolve them instead.)* |
 | references | <code>object</code> | The location and resolution of the resolved references in the Swagger definition |
 | options | <code>object</code> | The options passed to swaggerApi.create |
 

@@ -46,19 +46,9 @@ var swaggerDocCircular = YAML.load(
         "utf8",
     ),
 );
-var swaggerDocRelativeRefs = YAML.load(
-    fs.readFileSync(
-        path.join(
-            __dirname,
-            "./browser/documents/2.0/swagger-relative-refs.yaml",
-        ),
-        "utf8",
-    ),
-);
 var swaggerDocValidator = helpers.getJSONSchemaValidator();
 var swaggerApi;
 var swaggerApiCircular;
-var swaggerApiRelativeRefs;
 
 function fail(msg) {
     assert.fail(msg);
@@ -113,31 +103,6 @@ module.exports.getSwaggerApiCircular = (callback) => {
     }
 };
 
-module.exports.getSwaggerApiRelativeRefs = (callback) => {
-    if (swaggerApiRelativeRefs) {
-        callback(swaggerApiRelativeRefs);
-    } else {
-        Sway.create({
-            definition: swaggerDocRelativeRefs,
-            jsonRefs: {
-                location: path.join(
-                    relativeBase,
-                    "./2.0/swagger-relative-refs.yaml",
-                ),
-            },
-        }).then(
-            (obj) => {
-                swaggerApiRelativeRefs = obj;
-
-                callback(swaggerApiRelativeRefs);
-            },
-            (err) => {
-                callback(err);
-            },
-        );
-    }
-};
-
 module.exports.getSway = () => Sway;
 
 module.exports.shouldHadFailed = () => {
@@ -159,11 +124,6 @@ module.exports.swaggerDocCircular = swaggerDocCircular;
 module.exports.swaggerDocCircularPath = path.join(
     relativeBase,
     "./2.0/swagger-circular.yaml",
-);
-
-module.exports.swaggerDocRelativeRefsPath = path.join(
-    relativeBase,
-    "./2.0/swagger-relative-refs.yaml",
 );
 
 module.exports.swaggerDocValidator = swaggerDocValidator;

@@ -14,13 +14,20 @@ declare module 'sway-node' {
      */
     interface CreateOptions {
         /**
-         * The Swagger definition location or structure
+         * The Swagger definition location or structure. Only local `#/...` JSON References are
+         * supported; external/relative references are rejected.
          */
         definition: object | string;
         /**
-         * *(See [JsonRefs~JsonRefsOptions](https://github.com/whitlockjc/json-refs/blob/master/docs/API.md#module_JsonRefs..JsonRefsOptions))*
+         * Options for local reference resolution.
          */
-        jsonRefs?: object;
+        jsonRefs?: {
+            /**
+             * Whether to fully resolve circular `$ref`s. When `false` (the default), circular
+             * references are left unresolved rather than dereferenced.
+             */
+            resolveCirculars?: boolean;
+        };
         /**
          * The key/value pair of custom formats *(The keys are the format name and the
          * values are async functions.  See [ZSchema Custom Formats](https://github.com/zaggino/z-schema#register-a-custom-format))*
@@ -194,8 +201,13 @@ declare module 'sway-node' {
          * **Extra Properties:** Other than the documented properties, this object also exposes all properties of the definition
          * object.
          * @param definition - The original Swagger definition
-         * @param definitionRemotesResolved - The Swagger definition with all of its remote references resolved
-         * @param definitionFullyResolved - The Swagger definition with all of its references resolved
+         * @param definitionRemotesResolved - The original Swagger definition, unchanged *(External/relative
+         * references are not supported and are never resolved, so this is identical to `definition`; it is kept
+         * only for backward compatibility with the shape of this constructor.)*
+         * @param definitionFullyResolved - The Swagger definition with local (`#/...`) references resolved
+         * *(External/relative/invalid references are left unresolved — replaced with `{}` — rather than
+         * dereferenced. Circular local references are also left unresolved by default; set
+         * `options.jsonRefs.resolveCirculars` to fully resolve them instead.)*
          * @param references - The location and resolution of the resolved references in the Swagger definition
          * @param options - The options passed to swaggerApi.create
          */
