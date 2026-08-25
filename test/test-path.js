@@ -25,7 +25,7 @@
  */
 
 const { before, describe, it } = require("node:test");
-var _ = require("lodash");
+var { cloneDeep } = require("../lib/helpers");
 var assert = require("node:assert");
 var tHelpers = require("./helpers");
 var { pathToPtr } = require("../lib/json-ref-utils");
@@ -69,21 +69,21 @@ function runTests() {
 
             // Make sure they match the expected URLs
             assert.ok(
-                _.isArray(
+                Array.isArray(
                     pathObject.regexp.exec(
                         `${swaggerApi.definitionFullyResolved.basePath}/pet/1`,
                     ),
                 ),
             );
             assert.ok(
-                !_.isArray(
+                !Array.isArray(
                     pathObject.regexp.exec(
                         `${swaggerApi.definitionFullyResolved.basePath}/pets/1`,
                     ),
                 ),
             );
             assert.ok(
-                !_.isArray(
+                !Array.isArray(
                     pathObject.regexp.exec(
                         `${swaggerApi.definitionFullyResolved.basePath}/Pet/1`,
                     ),
@@ -106,10 +106,9 @@ function runTests() {
             });
 
             it("should return no operation for the missing method", () => {
-                assert.ok(
-                    _.isUndefined(
-                        swaggerApi.getPath("/pet/{petId}").getOperation("head"),
-                    ),
+                assert.equal(
+                    swaggerApi.getPath("/pet/{petId}").getOperation("head"),
+                    undefined,
                 );
             });
         });
@@ -123,7 +122,7 @@ function runTests() {
             });
 
             it("should return no operations", (done) => {
-                var cSwagger = _.cloneDeep(tHelpers.swaggerDoc);
+                var cSwagger = cloneDeep(tHelpers.swaggerDoc);
                 var path = "/petz";
 
                 cSwagger.paths[path] = {};
