@@ -4,6 +4,9 @@
     "description": "A library that simplifies Swagger integrations.",
     "main": "index.js",
     "types": "index.d.ts",
+    "engines": {
+        "node": ">=22.19.0"
+    },
     "private": false,
     "scripts": {
         "build": "echo",
@@ -36,7 +39,7 @@
         "lib"
     ],
     "devDependencies": {
-        "@biomejs/biome": "^2.1.4",
+        "@biomejs/biome": "2.5.14",
         "@semantic-release/git": "10.0.1",
         "@semantic-release/github": "12.0.9",
         "semantic-release": "25.0.6"
