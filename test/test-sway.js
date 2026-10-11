@@ -27,6 +27,7 @@
 const { describe, it } = require("node:test");
 var assert = require("node:assert");
 var helpers = require("./helpers");
+var libHelpers = require("../lib/helpers");
 var Sway = helpers.getSway();
 
 var invalidCreateScenarios = [
@@ -191,5 +192,200 @@ describe("sway", () => {
         });
 
         // TODO: Add test for definition file URL (remote)
+
+        describe("patterns rejected by the JSON Schema validator", () => {
+            function definitionWithPatterns(parameterPattern, propertyPattern) {
+                return {
+                    swagger: "2.0",
+                    info: { title: "Patterns", version: "1.0.0" },
+                    paths: {
+                        "/items/{id}": {
+                            get: {
+                                parameters: [
+                                    {
+                                        name: "id",
+                                        in: "path",
+                                        required: true,
+                                        type: "string",
+                                        pattern: parameterPattern,
+                                    },
+                                ],
+                                responses: {
+                                    200: {
+                                        description: "OK",
+                                        schema: { $ref: "#/definitions/Item" },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    definitions: {
+                        Item: {
+                            type: "object",
+                            "x-note": { pattern: "^(a+)+$" },
+                            example: { pattern: "^(a+)+$" },
+                            properties: {
+                                pattern: { type: "string" },
+                                code: {
+                                    type: "string",
+                                    pattern: propertyPattern,
+                                },
+                            },
+                        },
+                    },
+                };
+            }
+
+            it("should reject a definition with unsafe or invalid patterns", async () => {
+                await assert.rejects(
+                    Sway.create({
+                        definition: definitionWithPatterns(
+                            "^[a-z]+(?:-\\d+)?$",
+                            "^[a-z",
+                        ),
+                    }),
+                    (err) => {
+                        assert.equal(err.code, "INVALID_PATTERN");
+                        assert.deepEqual(
+                            err.errors.map((error) => [error.code, error.path]),
+                            [
+                                [
+                                    "KEYWORD_PATTERN",
+                                    [
+                                        "paths",
+                                        "/items/{id}",
+                                        "get",
+                                        "parameters",
+                                        "0",
+                                        "pattern",
+                                    ],
+                                ],
+                                [
+                                    "KEYWORD_PATTERN",
+                                    [
+                                        "definitions",
+                                        "Item",
+                                        "properties",
+                                        "code",
+                                        "pattern",
+                                    ],
+                                ],
+                            ],
+                        );
+                        assert.match(
+                            err.message,
+                            /#\/paths\/~1items~1\{id\}\/get\/parameters\/0\/pattern, #\/definitions\/Item\/properties\/code\/pattern$/,
+                        );
+
+                        return true;
+                    },
+                );
+            });
+
+            it("should accept rewritten patterns and ignore pattern values in extensions and examples", async () => {
+                var api = await Sway.create({
+                    definition: definitionWithPatterns(
+                        "^[a-z]+$|^[a-z]+-\\d+$",
+                        "^[A-Z]{2}\\d+$",
+                    ),
+                });
+                var results = api
+                    .getOperation("/items/{id}", "get")
+                    .validateRequest({ url: "/items/abc-12", method: "get" });
+
+                assert.deepEqual(results.errors, []);
+            });
+
+            it("should tell member names apart from keywords with the same name", () => {
+                var unsafe = "^(a+)+$";
+                var definition = {
+                    securityDefinitions: {
+                        oauth: {
+                            type: "oauth2",
+                            flow: "implicit",
+                            authorizationUrl: "https://example.com/oauth",
+                            scopes: { pattern: "[" },
+                        },
+                        properties: {
+                            type: "oauth2",
+                            flow: "implicit",
+                            authorizationUrl: "https://example.com/oauth",
+                            scopes: { pattern: unsafe },
+                        },
+                    },
+                    parameters: {
+                        properties: {
+                            in: "query",
+                            type: "string",
+                            pattern: unsafe,
+                        },
+                    },
+                    paths: {
+                        "/items": {
+                            get: {
+                                responses: {
+                                    default: {
+                                        description: "Error",
+                                        schema: {
+                                            type: "string",
+                                            pattern: unsafe,
+                                        },
+                                        headers: {
+                                            pattern: {
+                                                type: "string",
+                                                pattern: unsafe,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    definitions: {
+                        properties: { type: "string", pattern: unsafe },
+                        example: { type: "string", pattern: unsafe },
+                        Item: {
+                            type: "object",
+                            enum: [{ pattern: unsafe }],
+                            const: { pattern: unsafe },
+                            properties: {
+                                properties: { type: "string", pattern: unsafe },
+                                pattern: { type: "string", pattern: unsafe },
+                                "x-name": { type: "string", pattern: unsafe },
+                                const: { type: "string", pattern: unsafe },
+                                name: {
+                                    $ref: "#/definitions/properties",
+                                    pattern: unsafe,
+                                },
+                                tags: {
+                                    type: "array",
+                                    items: {
+                                        $ref: "#/definitions/properties",
+                                        items: { pattern: unsafe },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                };
+
+                assert.deepEqual(
+                    libHelpers
+                        .findRejectedPatterns(definition)
+                        .map((rejected) => rejected.path.join("/")),
+                    [
+                        "parameters/properties/pattern",
+                        "paths//items/get/responses/default/schema/pattern",
+                        "paths//items/get/responses/default/headers/pattern/pattern",
+                        "definitions/properties/pattern",
+                        "definitions/example/pattern",
+                        "definitions/Item/properties/properties/pattern",
+                        "definitions/Item/properties/pattern/pattern",
+                        "definitions/Item/properties/x-name/pattern",
+                        "definitions/Item/properties/const/pattern",
+                    ],
+                );
+            });
+        });
     });
 });
