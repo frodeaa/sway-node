@@ -25,14 +25,13 @@
  */
 
 const { before, describe, it } = require("node:test");
-var _ = require("lodash");
 var assert = require("node:assert");
 var helpers = require("./helpers");
 var Sway = helpers.getSway();
 
 describe("format validators", () => {
     it("always truthy", (done) => {
-        var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+        var cSwaggerDoc = structuredClone(helpers.swaggerDoc);
 
         cSwaggerDoc.paths["/pet/findByStatus"].get.parameters.push({
             name: "byte",
@@ -80,7 +79,7 @@ describe("format validators", () => {
         var goodParamNumberValue;
 
         before(async () => {
-            var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+            var cSwaggerDoc = structuredClone(helpers.swaggerDoc);
 
             cSwaggerDoc.paths["/pet/findByStatus"].get.parameters.push({
                 name: "int32",
@@ -143,7 +142,7 @@ describe("format validators", () => {
             var error = badParamValue.error;
 
             assert.ok(!badParamValue.valid);
-            assert.ok(!_.isUndefined(badParamValue.value));
+            assert.ok(badParamValue.value !== undefined);
             assert.equal(badParamValue.raw, 1.1);
             assert.equal(error.message, "Value failed JSON Schema validation");
             assert.equal(error.code, "SCHEMA_VALIDATION_FAILED");
@@ -162,7 +161,7 @@ describe("format validators", () => {
             var error = badParamNumberValue.error;
 
             assert.ok(!badParamNumberValue.valid);
-            assert.ok(!_.isUndefined(badParamNumberValue.value));
+            assert.ok(badParamNumberValue.value !== undefined);
             assert.equal(badParamNumberValue.raw, 1.1);
             assert.equal(error.message, "Value failed JSON Schema validation");
             assert.equal(error.code, "SCHEMA_VALIDATION_FAILED");
@@ -194,7 +193,7 @@ describe("format validators", () => {
         var goodParamNumberValue;
 
         before(async () => {
-            var cSwaggerDoc = _.cloneDeep(helpers.swaggerDoc);
+            var cSwaggerDoc = structuredClone(helpers.swaggerDoc);
 
             cSwaggerDoc.paths["/pet/findByStatus"].get.parameters.push({
                 name: "int64",
@@ -258,7 +257,7 @@ describe("format validators", () => {
             var error = badParamValue.error;
 
             assert.ok(!badParamValue.valid);
-            assert.ok(!_.isUndefined(badParamValue.value));
+            assert.ok(badParamValue.value !== undefined);
             assert.equal(badParamValue.raw, 1.1);
             assert.equal(error.message, "Value failed JSON Schema validation");
             assert.equal(error.code, "SCHEMA_VALIDATION_FAILED");
@@ -277,7 +276,7 @@ describe("format validators", () => {
             var error = badParamNumberValue.error;
 
             assert.ok(!badParamNumberValue.valid);
-            assert.ok(!_.isUndefined(badParamNumberValue.value));
+            assert.ok(badParamNumberValue.value !== undefined);
             assert.equal(badParamNumberValue.raw, 1.1);
             assert.equal(error.message, "Value failed JSON Schema validation");
             assert.equal(error.code, "SCHEMA_VALIDATION_FAILED");
