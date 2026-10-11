@@ -694,4 +694,40 @@ describe("issues", () => {
             assert.deepEqual(schema, original);
         });
     });
+
+    describe("should extract the request path without normalizing it", () => {
+        var scenarios = [
+            ["/pet/1?status=sold", "/pet/1"],
+            ["/pet/1#details", "/pet/1"],
+            ["/pet/1?next=/a#b", "/pet/1"],
+            ["http://localhost:8080/pet/1?status=sold", "/pet/1"],
+            ["https://localhost", "/"],
+            ["/pet\\1?q=a\\b", "/pet/1"],
+            ["//evil.example.com/pet", "//evil.example.com/pet"],
+            ["/store/../pet", "/store/../pet"],
+            ["/pet/%2E%2E/store", "/pet/%2E%2E/store"],
+            ["/café/1", "/café/1"],
+            ["//user@host/pet", "//user@host/pet"],
+            ["//]^:)", "//]^:)"],
+        ];
+
+        scenarios.forEach(([url, expected]) => {
+            it(url, () => {
+                assert.equal(
+                    libHelpers.getRequestPathname({ url: url }),
+                    expected,
+                );
+            });
+        });
+
+        it("should prefer originalUrl over url", () => {
+            assert.equal(
+                libHelpers.getRequestPathname({
+                    originalUrl: "/api/pet/1?x=1",
+                    url: "/pet/1",
+                }),
+                "/api/pet/1",
+            );
+        });
+    });
 });
