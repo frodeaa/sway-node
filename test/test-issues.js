@@ -693,6 +693,72 @@ describe("issues", () => {
 
             assert.deepEqual(schema, original);
         });
+
+        it("should ignore Swagger example values", () => {
+            var first = {
+                type: "object",
+                properties: { amount: { type: "integer" } },
+                example: { id: "10", amount: 1 },
+            };
+            var second = {
+                type: "array",
+                items: { type: "string", example: { id: "10" } },
+                example: [{ id: "10" }],
+            };
+
+            assert.deepEqual(errorCodes(first, { amount: 1 }), []);
+            assert.deepEqual(errorCodes(second, ["a"]), []);
+            assert.deepEqual(errorCodes(first, { amount: "1" }), [
+                "INVALID_TYPE",
+            ]);
+            assert.deepEqual(errorCodes(second, [1]), ["INVALID_TYPE"]);
+        });
+
+        it("should keep compiled schemas when examples share an id", () => {
+            var cache = validator.compiledSchemaCache;
+            var clear = cache.clear;
+            var clears = 0;
+            var first = {
+                type: "object",
+                properties: { amount: { type: "integer" } },
+                example: { id: "shared-example-id" },
+            };
+            var second = {
+                type: "object",
+                properties: { name: { type: "string" } },
+                example: { id: "shared-example-id" },
+            };
+
+            cache.clear = function (...args) {
+                clears += 1;
+                return clear.apply(this, args);
+            };
+            try {
+                errorCodes(first, { amount: 1 });
+                errorCodes(second, { name: "a" });
+                errorCodes(first, { amount: 1 });
+            } finally {
+                cache.clear = clear;
+            }
+
+            assert.equal(clears, 0);
+        });
+
+        it("should validate a property named example", () => {
+            var schema = {
+                type: "object",
+                properties: { example: { type: "string" } },
+                required: ["example"],
+            };
+
+            assert.deepEqual(errorCodes(schema, { example: "a" }), []);
+            assert.deepEqual(errorCodes(schema, { example: 1 }), [
+                "INVALID_TYPE",
+            ]);
+            assert.deepEqual(errorCodes(schema, {}), [
+                "OBJECT_MISSING_REQUIRED_PROPERTY",
+            ]);
+        });
     });
 
     describe("should extract the request path without normalizing it", () => {
