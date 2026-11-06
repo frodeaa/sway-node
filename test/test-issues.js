@@ -28,6 +28,7 @@ const { before, describe, it } = require("node:test");
 var libHelpers = require("../lib/helpers");
 var { cloneDeep, isPlainObject } = libHelpers;
 var assert = require("node:assert");
+var ZSchema = require("z-schema").default;
 var helpers = require("./helpers");
 var Sway = helpers.getSway();
 
@@ -741,6 +742,21 @@ describe("issues", () => {
                 "INVALID_TYPE",
             ]);
             assert.deepEqual(errorCodes(second, [1]), ["INVALID_TYPE"]);
+        });
+
+        it("should not apply other validators' strict options to the draft-04 meta-schema", () => {
+            var strictValidator = ZSchema.create({
+                version: "draft-04",
+                noTypeless: true,
+                noExtraKeywords: true,
+                forceProperties: true,
+            });
+            var validate = strictValidator.compile({
+                type: "object",
+                properties: { name: { type: "string" } },
+            });
+
+            assert.equal(validate({ name: "a" }), true);
         });
 
         it("should keep compiled schemas when examples share an id", () => {
