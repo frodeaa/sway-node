@@ -671,6 +671,35 @@ describe("issues", () => {
             }
         });
 
+        it("should report the invalid value of a format error unchanged", () => {
+            libHelpers.registerFormat("never", () => false);
+
+            try {
+                [
+                    [594149940585, "594149940585"],
+                    [true, "true"],
+                    ["abc", "abc"],
+                    [{ a: 1 }, '{"a":1}'],
+                    [[1, 2], "1,2"],
+                    [null, "null"],
+                ].forEach(([value, messageValue]) => {
+                    var error = libHelpers.validateAgainstSchema(
+                        validator,
+                        { format: "never" },
+                        value,
+                    ).errors[0];
+
+                    assert.deepEqual(error.params, ["never", value]);
+                    assert.equal(
+                        error.message,
+                        `Object didn't pass validation for format never: ${messageValue}`,
+                    );
+                });
+            } finally {
+                libHelpers.unregisterFormat("never");
+            }
+        });
+
         it("should use schema changes made after a previous validation", () => {
             var schema = { type: "string", minLength: 1 };
 
