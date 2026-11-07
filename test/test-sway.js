@@ -39,6 +39,10 @@ var invalidCreateScenarios = [
         "options.definition must be either an object or a string",
     ],
     [
+        [{ definition: "https://example.com/swagger.yaml" }],
+        "options.definition must be a file path, remote definitions are not supported",
+    ],
+    [
         [{ definition: {}, jsonRefs: "wrongType" }],
         "options.jsonRefs must be an object",
     ],
@@ -190,8 +194,6 @@ describe("sway", () => {
                 .then(validateCreateSwaggerApi(options))
                 .then(done, done);
         });
-
-        // TODO: Add test for definition file URL (remote)
 
         describe("patterns rejected by the JSON Schema validator", () => {
             function definitionWithPatterns(parameterPattern, propertyPattern) {
