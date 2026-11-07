@@ -22,10 +22,50 @@
  * THE SOFTWARE.
  */
 
+var fs = require("node:fs/promises");
+var path = require("node:path");
+var { fileURLToPath } = require("node:url");
+var YAML = require("js-yaml");
 var helpers = require("./lib/helpers");
-var { $RefParser } = require("@apidevtools/json-schema-ref-parser");
+var { dereference } = require("./lib/dereference");
 var SwaggerApi = require("./lib/types/api");
 var { collectAndSanitizeRefs, pathToPtr } = require("./lib/json-ref-utils");
+
+var LEGACY_YAML_SCHEMA = YAML.CORE_SCHEMA.withTags(
+    YAML.timestampTag,
+    YAML.mergeTag,
+    YAML.binaryTag,
+    YAML.omapTag,
+    YAML.pairsTag,
+    YAML.setTag,
+);
+
+function readDefinition(location) {
+    return fs.readFile(
+        location.startsWith("file:")
+            ? fileURLToPath(location)
+            : path.resolve(location),
+        "utf8",
+    );
+}
+
+function parseDefinition(text, location) {
+    if (/\.json$/i.test(location)) {
+        try {
+            return JSON.parse(text.replace(/^\uFEFF/, ""));
+        } catch {}
+    }
+
+    try {
+        return YAML.load(text, { schema: YAML.CORE_SCHEMA });
+    } catch {
+        return YAML.load(text, { schema: LEGACY_YAML_SCHEMA });
+    }
+}
+
+async function loadDefinition(location) {
+    return parseDefinition(await readDefinition(location), location);
+}
 
 /**
  * A library for simpler [Swagger](http://swagger.io/) integrations.
@@ -41,7 +81,7 @@ var { collectAndSanitizeRefs, pathToPtr } = require("./lib/json-ref-utils");
  * @returns {Promise<module:sway.SwaggerApi>} The promise
  *
  * @example
- * SwaggerApi.create({definition: 'http://petstore.swagger.io/v2/swagger.yaml'})
+ * SwaggerApi.create({definition: './swagger.yaml'})
  *   .then(function (api) {
  *     console.log('Documentation URL: ', api.documentationUrl);
  *   }, function (err) {
@@ -68,6 +108,13 @@ module.exports.create = (options) => {
                 ) {
                     throw new TypeError(
                         "options.definition must be either an object or a string",
+                    );
+                } else if (
+                    typeof options.definition === "string" &&
+                    /^https?:\/\//i.test(options.definition)
+                ) {
+                    throw new TypeError(
+                        "options.definition must be a file path, remote definitions are not supported",
                     );
                 } else if (
                     options.jsonRefs !== undefined &&
@@ -131,43 +178,28 @@ module.exports.create = (options) => {
 
     //
     allTasks = allTasks
-        // Resolve references using json-schema-ref-parser
+        // Resolve local references
         .then(async () => {
             var definition = cOptions.definition;
-            var rawDoc;
-            var parser;
-
-            if (typeof definition === "string") {
-                parser = new $RefParser();
-                rawDoc = await parser.parse(definition);
-            } else {
-                rawDoc = definition;
-            }
+            var rawDoc =
+                typeof definition === "string"
+                    ? await loadDefinition(definition)
+                    : definition;
 
             // Clone rawDoc, then collect ref metadata and sanitize in a single pass.
             // Invalid/missing refs are replaced with {} before the parser sees them.
             var sanitizedDoc = helpers.cloneDeep(rawDoc);
             var refs = collectAndSanitizeRefs(sanitizedDoc);
 
-            // Dereference all local references; external resolution is disabled as a
-            // safety net — only local #/... refs should remain after sanitization.
-            // Circular refs are only fully resolved when explicitly opted into via
-            // options.jsonRefs.resolveCirculars (matching json-refs' prior default of
-            // false); otherwise circular $refs are left unresolved rather than
-            // throwing, so callers relying on Sway's own circular-inheritance
-            // detection keep working.
-            var definitionFullyResolved = await $RefParser.dereference(
-                sanitizedDoc,
-                {
-                    dereference: {
-                        circular:
-                            (cOptions.jsonRefs?.resolveCirculars ?? false)
-                                ? true
-                                : "ignore",
-                    },
-                    resolve: { external: false },
-                },
-            );
+            // Dereference all local references (only local #/... refs remain after
+            // sanitization). Circular refs are only fully resolved when explicitly
+            // opted into via options.jsonRefs.resolveCirculars (matching json-refs'
+            // prior default of false); otherwise circular $refs are left unresolved
+            // rather than throwing, so callers relying on Sway's own
+            // circular-inheritance detection keep working.
+            var definitionFullyResolved = dereference(sanitizedDoc, {
+                resolveCirculars: cOptions.jsonRefs?.resolveCirculars ?? false,
+            });
 
             return {
                 // The original Swagger definition (not dereferenced)

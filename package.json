@@ -46,7 +46,6 @@
         "semantic-release": "25.0.9"
     },
     "dependencies": {
-        "@apidevtools/json-schema-ref-parser": "^16.0.5",
         "js-yaml": "^5.5.0",
         "path-to-regexp": "^8.4.2",
         "z-schema": "^12.5.0"
