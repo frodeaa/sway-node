@@ -2,7 +2,7 @@
 > active and maintenance [Node.js LTS releases][node-releases] and to keep dependencies to a minimum.
 
 A library that simplifies [Swagger][swagger] integrations.  This library handles the minutiae of loading Swagger
-documents *(from a file, a URL or an object)*, resolving local references, building an object model and providing you
+documents *(from a file or an object)*, resolving local references, building an object model and providing you
 with a rich set of APIs for things like Swagger document validation, request/response validation, etc.
 
 Sway supports Swagger `2.0` only.  Documents in other versions, such as OpenAPI 3, must be converted before using Sway.

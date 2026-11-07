@@ -166,9 +166,6 @@ importers:
 
   .:
     dependencies:
-      '@apidevtools/json-schema-ref-parser':
-        specifier: ^16.0.5
-        version: 16.0.5(@types/json-schema@7.0.15)
       js-yaml:
         specifier: ^5.5.0
         version: 5.5.0
@@ -205,12 +202,6 @@ packages:
 
   '@actions/io@3.0.2':
     resolution: {integrity: sha512-nRBchcMM+QK1pdjO7/idu86rbJI5YHUKCvKs0KxnSYbVe3F51UfGxuZX4Qy/fWlp6l7gWFwIkrOzN+oUK03kfw==}
-
-  '@apidevtools/json-schema-ref-parser@16.0.5':
-    resolution: {integrity: sha512-z3LiEMqTP2FNu6u8bdUgBYErVuwMSZReOJy1MCEIB0BDHMoNgBtkciby32HOlcrfWwrOSzRU8YIsZ0CogYRuYQ==}
-    engines: {node: '>=22.19.0'}
-    peerDependencies:
-      '@types/json-schema': ^7.0.15
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -395,9 +386,6 @@ packages:
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
-
-  '@types/json-schema@7.0.15':
-    resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -1513,11 +1501,6 @@ snapshots:
 
   '@actions/io@3.0.2': {}
 
-  '@apidevtools/json-schema-ref-parser@16.0.5(@types/json-schema@7.0.15)':
-    dependencies:
-      '@types/json-schema': 7.0.15
-      js-yaml: 5.5.0
-
   '@babel/code-frame@7.29.7':
     dependencies:
       '@babel/helper-validator-identifier': 7.29.7
@@ -1736,8 +1719,6 @@ snapshots:
   '@sindresorhus/is@4.6.0': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
-
-  '@types/json-schema@7.0.15': {}
 
   '@types/normalize-package-data@2.4.4': {}
 

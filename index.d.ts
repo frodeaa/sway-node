@@ -14,7 +14,7 @@ declare module 'sway-node' {
      */
     interface CreateOptions {
         /**
-         * The Swagger definition location or structure. Only local `#/...` JSON References are
+         * The Swagger definition file path or structure. Only local `#/...` JSON References are
          * supported; external/relative references are rejected.
          */
         definition: object | string;

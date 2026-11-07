@@ -26,6 +26,8 @@
 
 const { describe, it } = require("node:test");
 var assert = require("node:assert");
+var path = require("node:path");
+var { pathToFileURL } = require("node:url");
 var helpers = require("./helpers");
 var libHelpers = require("../lib/helpers");
 var Sway = helpers.getSway();
@@ -37,6 +39,21 @@ var invalidCreateScenarios = [
     [
         [{ definition: false }],
         "options.definition must be either an object or a string",
+    ],
+    [
+        [{ definition: "https://example.com/swagger.yaml" }],
+        "options.definition must be a file path, remote definitions are not supported",
+    ],
+    [
+        [
+            {
+                definition: path.join(
+                    __dirname,
+                    "./browser/documents/2.0/scalar.json",
+                ),
+            },
+        ],
+        "options.definition must contain a Swagger definition object",
     ],
     [
         [{ definition: {}, jsonRefs: "wrongType" }],
@@ -173,6 +190,19 @@ describe("sway", () => {
                 .then(done, done);
         });
 
+        it("should handle definition file URL with upper-case scheme", (done) => {
+            var options = {
+                definition: pathToFileURL(helpers.swaggerDocPath).href.replace(
+                    /^file:/,
+                    "FILE:",
+                ),
+            };
+
+            Sway.create(options)
+                .then(validateCreateSwaggerApi(options))
+                .then(done, done);
+        });
+
         it("should register customValidators", (done) => {
             var options = {
                 definition: helpers.swaggerDoc,
@@ -190,8 +220,6 @@ describe("sway", () => {
                 .then(validateCreateSwaggerApi(options))
                 .then(done, done);
         });
-
-        // TODO: Add test for definition file URL (remote)
 
         describe("patterns rejected by the JSON Schema validator", () => {
             function definitionWithPatterns(parameterPattern, propertyPattern) {
