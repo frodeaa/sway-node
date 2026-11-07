@@ -185,7 +185,9 @@ module.exports.create = (options) => {
             // We need to remove all circular objects as z-schema does not work with them:
             //   https://github.com/zaggino/z-schema/issues/137
             helpers.removeCirculars(results.definition);
-            helpers.removeCirculars(results.definitionRemotesResolved);
+            if (results.definitionRemotesResolved !== results.definition) {
+                helpers.removeCirculars(results.definitionRemotesResolved);
+            }
             helpers.removeCirculars(results.definitionFullyResolved);
 
             const rejectedPatterns = helpers.findRejectedPatterns(
