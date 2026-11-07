@@ -61,7 +61,7 @@ Options used when creating the `SwaggerApi`.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| definition | <code>object</code> &#124; <code>string</code> | The Swagger definition location or structure. Only local `#/...` JSON References are supported; external/relative references are rejected. |
+| definition | <code>object</code> &#124; <code>string</code> | The Swagger definition file path or structure. Only local `#/...` JSON References are supported; external/relative references are rejected. |
 | jsonRefs | <code>object</code> | Options for local reference resolution |
 | jsonRefs.resolveCirculars | <code>boolean</code> | <code>false</code> Whether to fully resolve circular `$ref`s. When `false` (the default), circular references are left unresolved rather than dereferenced. |
 | customFormats | <code>object</code> | The key/value pair of custom formats *(The keys are the format name and the values are async functions.  See [ZSchema Custom Formats](https://github.com/zaggino/z-schema#register-a-custom-format))* |
@@ -751,7 +751,7 @@ Creates a SwaggerApi object from its Swagger definition(s).
 
 **Example**  
 ```js
-SwaggerApi.create({definition: 'http://petstore.swagger.io/v2/swagger.yaml'})
+SwaggerApi.create({definition: './swagger.yaml'})
   .then(function (api) {
     console.log('Documentation URL: ', api.documentationUrl);
   }, function (err) {
