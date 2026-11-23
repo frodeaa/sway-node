@@ -47,7 +47,7 @@
     },
     "dependencies": {
         "js-yaml": "^5.5.0",
-        "path-to-regexp": "^8.4.2",
+        "path-to-regexp": "^9.0.0",
         "z-schema": "^12.5.0"
     },
     "release": {
